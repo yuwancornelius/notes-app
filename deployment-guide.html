@@ -549,10 +549,39 @@
             <div class="logo-icon">📝</div>
             <h1>CuyNotes Deployment Guide</h1>
             <p class="subtitle">Panduan lengkap untuk mempersiapkan dan menjalankan CuyNotes di server baru</p>
+            <p class="subtitle" style="margin-top: 12px;"><a href="https://github.com/yuwancornelius/notes-app"
+                    target="_blank"
+                    style="color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.15); padding: 8px 20px; border-radius: 8px; text-decoration: none; font-size: 0.9rem; backdrop-filter: blur(10px);">⭐
+                    github.com/yuwancornelius/notes-app</a></p>
         </div>
     </div>
 
     <div class="container">
+
+        <!-- Quick Start -->
+        <div class="toc" style="border-left: 4px solid #22c55e;">
+            <h2>🚀 Quick Start — Jalankan di Server Baru</h2>
+            <p style="color: #475569; margin-bottom: 16px;">Jika kamu sudah punya Docker terinstall, cukup jalankan 3
+                langkah ini untuk menjalankan CuyNotes di server baru:</p>
+            <pre style="margin: 0;"><span class="comment"># 1. Clone project dari GitHub</span>
+<span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git
+<span class="command">cd</span> notes-app
+
+<span class="comment"># 2. Setup environment files dari template</span>
+<span class="command">cp</span> backend/.env.example backend/.env
+<span class="command">cp</span> client/.env.example client/.env
+
+<span class="comment"># 3. Build dan jalankan semua container</span>
+<span class="command">docker compose up --build -d</span>
+
+<span class="comment"># ✅ Buka browser → http://localhost:3000</span></pre>
+            <div class="info-box tip" style="margin-top: 16px; margin-bottom: 0;">
+                <div class="icon-box">💡</div>
+                <p><strong>Hanya 3 langkah!</strong> Jika deploy ke server remote, ganti
+                    <code>NEXT_PUBLIC_API_URL</code> di <code>client/.env</code> ke IP server kamu. Untuk detail
+                    lengkap, baca panduan di bawah.</p>
+            </div>
+        </div>
 
         <!-- Table of Contents -->
         <div class="toc">
@@ -821,22 +850,23 @@ services:
                         </li>
                         <li>
                             <strong>Copy project ke server</strong>
-                            <p>Transfer folder <code>notes-app</code> ke server menggunakan salah satu cara berikut:</p>
-                            <pre><span class="comment"># Opsi 1: via Git (jika sudah di repository)</span>
-<span class="command">git clone</span> https://github.com/username/notes-app.git
-<span class="command">cd</span> notes-app
-
-<span class="comment"># Opsi 2: via SCP (dari laptop ke server)</span>
-<span class="command">scp</span> -r ./notes-app user@server-ip:/path/tujuan/
-
-<span class="comment"># Opsi 3: via USB / direct copy</span>
-<span class="comment"># Copy manual folder notes-app ke server</span></pre>
+                            <p>Clone project langsung dari GitHub:</p>
+                            <pre><span class="comment"># Clone dari GitHub</span>
+<span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git
+<span class="command">cd</span> notes-app</pre>
                         </li>
                         <li>
-                            <strong>Konfigurasi environment</strong>
-                            <p>Edit file-file environment sesuai panduan di <a href="#environment"
-                                    style="color: #3b82f6;">bagian Konfigurasi Environment</a>. Pastikan semua password
-                                dan secret key sudah diganti.</p>
+                            <strong>Setup environment files</strong>
+                            <p>Copy file <code>.env.example</code> menjadi <code>.env</code> dan sesuaikan isinya:</p>
+                            <pre><span class="comment"># Copy template environment</span>
+<span class="command">cp</span> backend/.env.example backend/.env
+<span class="command">cp</span> client/.env.example client/.env
+
+<span class="comment"># Edit jika perlu (ganti password, secret key, IP server)</span>
+<span class="comment"># Untuk local: tidak perlu diubah, langsung jalan</span>
+<span class="comment"># Untuk server remote: ganti NEXT_PUBLIC_API_URL di client/.env</span></pre>
+                            <p>Untuk detail lengkap, lihat <a href="#environment" style="color: #3b82f6;">bagian
+                                    Konfigurasi Environment</a>.</p>
                         </li>
                         <li>
                             <strong>Buka Terminal di folder project</strong>
@@ -960,28 +990,18 @@ services:
 <span class="command">docker run hello-world</span></pre>
                         </li>
                         <li>
-                            <strong>Transfer project ke server</strong>
-                            <pre><span class="comment"># Opsi 1: via Git</span>
-<span class="command">git clone</span> https://github.com/username/notes-app.git
-<span class="command">cd</span> notes-app
-
-<span class="comment"># Opsi 2: via SCP dari laptop</span>
-<span class="command">scp</span> -r ./notes-app user@server-ip:~/
-
-<span class="comment"># Opsi 3: via rsync (lebih cepat untuk file banyak)</span>
-<span class="command">rsync</span> -avz --progress ./notes-app user@server-ip:~/</pre>
+                            <strong>Clone project dari GitHub</strong>
+                            <pre><span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git
+<span class="command">cd</span> notes-app</pre>
                         </li>
                         <li>
-                            <strong>Konfigurasi environment</strong>
-                            <pre><span class="command">cd</span> ~/notes-app
+                            <strong>Setup environment files</strong>
+                            <pre><span class="comment"># Copy template environment menjadi .env</span>
+<span class="command">cp</span> backend/.env.example backend/.env
+<span class="command">cp</span> client/.env.example client/.env
 
-<span class="comment"># Edit docker-compose.yml</span>
-<span class="command">nano</span> docker-compose.yml
-
-<span class="comment"># Edit backend/.env</span>
+<span class="comment"># Edit jika perlu (ganti password, secret key, IP server)</span>
 <span class="command">nano</span> backend/.env
-
-<span class="comment"># Edit client/.env (ganti localhost ke IP server)</span>
 <span class="command">nano</span> client/.env</pre>
                             <div class="info-box warning">
                                 <div class="icon-box">⚠️</div>
@@ -1148,7 +1168,7 @@ services:
 <span class="command">docker exec -i cuynotes_db</span> mysql -u notes_user -pnotes_password cuynotes < backup.sql</pre>
 
                 <h3>Update Aplikasi</h3>
-                <pre><span class="comment"># Pull perubahan terbaru (jika via Git)</span>
+                <pre><span class="comment"># Pull perubahan terbaru dari GitHub</span>
 <span class="command">git pull origin main</span>
 
 <span class="comment"># Rebuild dan restart containers</span>
@@ -1188,7 +1208,8 @@ services:
                 <div class="info-box tip">
                     <div class="icon-box">💡</div>
                     <p><strong>Tips:</strong> Tidak ada spasi antara <code>-p</code> dan password. Contoh:
-                        <code>-pnotes_password</code> (benar) vs <code>-p notes_password</code> (salah).</p>
+                        <code>-pnotes_password</code> (benar) vs <code>-p notes_password</code> (salah).
+                    </p>
                 </div>
 
                 <h3>Cara 2: Akses sebagai Root</h3>
@@ -1197,7 +1218,8 @@ services:
 
                 <h3>Cara 3: Via MySQL Client Eksternal</h3>
                 <p>Kamu juga bisa menggunakan GUI tools seperti <strong>MySQL Workbench</strong>,
-                    <strong>DBeaver</strong>, <strong>TablePlus</strong>, atau <strong>phpMyAdmin</strong>:</p>
+                    <strong>DBeaver</strong>, <strong>TablePlus</strong>, atau <strong>phpMyAdmin</strong>:
+                </p>
 
                 <table>
                     <thead>
@@ -1291,7 +1313,8 @@ services:
                         <tr>
                             <td><strong>notes</strong></td>
                             <td><code>id</code>, <code>title</code>, <code>content</code>, <code>visibility</code>,
-                                <code>password_hash</code>, <code>user_id</code></td>
+                                <code>password_hash</code>, <code>user_id</code>
+                            </td>
                             <td>Data catatan dengan proteksi password</td>
                         </tr>
                         <tr>
