@@ -1,0 +1,25 @@
+import './globals.css';
+import { AuthProvider } from '@/store/AuthContext';
+
+export const metadata = {
+  title: 'CuyNotes — Your Personal Notes App',
+  description: 'Create, share, and protect your notes with CuyNotes',
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased">
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}

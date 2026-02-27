@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuyNotes - Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.7;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e3a8a 100%);
+            padding: 60px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .hero .subtitle {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 400;
+            position: relative;
+        }
+
+        .hero .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 32px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        .toc {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: -40px;
+            position: relative;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .toc h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .toc .step-num {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Sections */
+        section {
+            margin-top: 40px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+        }
+
+        section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        section h2 .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        section h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 24px 0 12px;
+        }
+
+        section p {
+            color: #475569;
+            margin-bottom: 14px;
+        }
+
+        /* Code blocks */
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 14px 0 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            position: relative;
+            border: 1px solid #1e293b;
+        }
+
+        pre .comment {
+            color: #64748b;
+        }
+
+        pre .command {
+            color: #22d3ee;
+        }
+
+        pre .string {
+            color: #a5f3fc;
+        }
+
+        pre .keyword {
+            color: #f472b6;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.88em;
+            color: #dc2626;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Info boxes */
+        .info-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box .icon-box {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .info-box.tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .info-box.tip p {
+            color: #166534;
+            margin: 0;
+        }
+
+        .info-box.warning {
+            background: #fefce8;
+            border: 1px solid #fde68a;
+        }
+
+        .info-box.warning p {
+            color: #854d0e;
+            margin: 0;
+        }
+
+        .info-box.danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .info-box.danger p {
+            color: #991b1b;
+            margin: 0;
+        }
+
+        .info-box.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .info-box.info p {
+            color: #1e40af;
+            margin: 0;
+        }
+
+        /* Step list */
+        .step-list {
+            counter-reset: steps;
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            counter-increment: steps;
+            padding: 16px 0 16px 56px;
+            position: relative;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step-list li strong {
+            display: block;
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .step-list li p {
+            margin: 0;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #64748b;
+            border-radius: 10px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #1d4ed8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: #3b82f6;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 32px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* File tree */
+        .file-tree {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 24px;
+            border-radius: 12px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            border: 1px solid #1e293b;
+        }
+
+        .file-tree .folder {
+            color: #60a5fa;
+        }
+
+        .file-tree .file {
+            color: #94a3b8;
+        }
+
+        .file-tree .important {
+            color: #fbbf24;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge.blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+            margin: 32px 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        /* Diagram images */
+        .diagram-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .diagram-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .diagram-container .caption {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .toc ul {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 24px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="container">
+            <div class="logo-icon">📝</div>
+            <h1>CuyNotes Deployment Guide</h1>
+            <p class="subtitle">Panduan lengkap untuk mempersiapkan dan menjalankan CuyNotes di server baru</p>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h2>📋 Daftar Isi</h2>
+            <ul>
+                <li><a href="#overview"><span class="step-num">1</span> Overview Aplikasi</a></li>
+                <li><a href="#requirements"><span class="step-num">2</span> System Requirements</a></li>
+                <li><a href="#structure"><span class="step-num">3</span> Struktur Project</a></li>
+                <li><a href="#environment"><span class="step-num">4</span> Konfigurasi Environment</a></li>
+                <li><a href="#docker-deploy"><span class="step-num">5</span> Deploy dengan Docker</a></li>
+                <li><a href="#verify"><span class="step-num">6</span> Verifikasi & Testing</a></li>
+                <li><a href="#management"><span class="step-num">7</span> Manajemen Container</a></li>
+                <li><a href="#mysql-access"><span class="step-num">8</span> Akses Database MySQL</a></li>
+                <li><a href="#troubleshooting"><span class="step-num">9</span> Troubleshooting</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Overview -->
+        <section id="overview">
+            <div class="section-card">
+                <h2><span class="icon">📖</span> Overview Aplikasi</h2>
+                <p>
+                    <strong>CuyNotes</strong> adalah aplikasi catatan (notes) full-stack yang dibangun dengan arsitektur
+                    modern menggunakan 3 service utama yang berjalan di Docker container.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Teknologi</th>
+                            <th>Port</th>
+                            <th>Fungsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Frontend</strong></td>
+                            <td><span class="badge blue">Next.js + React</span></td>
+                            <td><code>3000</code></td>
+                            <td>User interface & halaman web</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend</strong></td>
+                            <td><span class="badge green">Flask + Python</span></td>
+                            <td><code>5001</code></td>
+                            <td>REST API, autentikasi, business logic</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database</strong></td>
+                            <td><span class="badge amber">MySQL 8.0</span></td>
+                            <td><code>3306</code></td>
+                            <td>Penyimpanan data notes & users</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Fitur Utama</h3>
+                <ul style="padding-left: 20px; color: #475569;">
+                    <li>✅ Register & Login (JWT Authentication)</li>
+                    <li>✅ Create, Read, Update, Delete (CRUD) Notes</li>
+                    <li>✅ Visibilitas: Public, Private, Protected (password)</li>
+                    <li>✅ Favorite notes</li>
+                    <li>✅ Search notes</li>
+                    <li>✅ Profile management</li>
+                    <li>✅ Password protection dengan verifikasi ganda</li>
+                </ul>
+
+                <h3>Topologi Arsitektur</h3>
+                <p>Berikut adalah diagram topologi jaringan CuyNotes yang menunjukkan bagaimana ketiga service saling
+                    terhubung di dalam Docker Network:</p>
+                <div class="diagram-container">
+                    <img src="network-topology.png" alt="CuyNotes Network Topology">
+                    <div class="caption">Diagram topologi Docker Network — User Browser → Frontend (port 3000) → Backend
+                        API (port 5001) → MySQL Database (port 3306)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Requirements -->
+        <section id="requirements">
+            <div class="section-card">
+                <h2><span class="icon">⚙️</span> System Requirements</h2>
+                <p>Pastikan server kamu memiliki software berikut sebelum memulai deployment:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Minimum Version</th>
+                            <th>Cara Cek</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Docker Engine</strong></td>
+                            <td>20.10+</td>
+                            <td><code>docker --version</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Docker Compose</strong></td>
+                            <td>v2.0+</td>
+                            <td><code>docker compose version</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Git</strong></td>
+                            <td>2.30+</td>
+                            <td><code>git --version</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Kebutuhan Hardware Minimum</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Resource</th>
+                            <th>Minimum</th>
+                            <th>Recommended</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>RAM</strong></td>
+                            <td>2 GB</td>
+                            <td>4 GB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>CPU</strong></td>
+                            <td>1 Core</td>
+                            <td>2 Cores</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Storage</strong></td>
+                            <td>5 GB</td>
+                            <td>10 GB</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info">
+                    <div class="icon-box">ℹ️</div>
+                    <p>Untuk OS yang didukung: <strong>macOS</strong>, <strong>Linux</strong> (Ubuntu, CentOS, Debian),
+                        dan <strong>Windows</strong> (dengan WSL2).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Project Structure -->
+        <section id="structure">
+            <div class="section-card">
+                <h2><span class="icon">📁</span> Struktur Project</h2>
+                <p>Berikut adalah struktur folder project CuyNotes yang perlu kamu transfer ke server:</p>
+
+                <div class="diagram-container">
+                    <img src="project-structure.png" alt="CuyNotes Project Structure Flowchart">
+                    <div class="caption">Flowchart struktur project CuyNotes — Backend (Flask + Python) &amp; Client
+                        (Next.js + React)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Environment -->
+        <section id="environment">
+            <div class="section-card">
+                <h2><span class="icon">🔐</span> Konfigurasi Environment</h2>
+                <p>Ada beberapa file konfigurasi yang <strong>wajib dikonfigurasi</strong> sebelum deploy ke server
+                    baru.</p>
+
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>PENTING:</strong> Ganti semua password dan secret key untuk production! Jangan gunakan
+                        nilai default.</p>
+                </div>
+
+                <h3>1. File <code>docker-compose.yml</code></h3>
+                <p>File utama yang mengatur semua service. Yang perlu diubah untuk production:</p>
+
+                <pre><span class="comment"># docker-compose.yml - Bagian yang perlu disesuaikan</span>
+
+services:
+  cuynotes_db:
+    environment:
+      <span class="keyword">MYSQL_ROOT_PASSWORD:</span> <span class="string">GANTI_DENGAN_PASSWORD_ROOT_KUAT</span>
+      <span class="keyword">MYSQL_DATABASE:</span> <span class="string">cuynotes</span>
+      <span class="keyword">MYSQL_USER:</span> <span class="string">notes_user</span>
+      <span class="keyword">MYSQL_PASSWORD:</span> <span class="string">GANTI_DENGAN_PASSWORD_DB_KUAT</span>
+
+  backend_flask:
+    environment:
+      <span class="keyword">SECRET_KEY:</span> <span class="string">GANTI_DENGAN_SECRET_KEY_RANDOM</span>
+      <span class="keyword">JWT_SECRET_KEY:</span> <span class="string">GANTI_DENGAN_JWT_SECRET_RANDOM</span>
+      <span class="keyword">DATABASE_URL:</span> <span class="string">mysql+pymysql://notes_user:PASSWORD_DB@cuynotes_db:3306/cuynotes</span>
+
+  frontend_nextjs:
+    environment:
+      <span class="comment"># Jika deploy ke domain/IP publik, ganti localhost</span>
+      <span class="keyword">NEXT_PUBLIC_API_URL:</span> <span class="string">http://IP_SERVER_KAMU:5001/api</span></pre>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips:</strong> Untuk generate secret key yang aman, gunakan perintah:<br>
+                        <code
+                            style="background: #dcfce7; border-color: #bbf7d0;">python3 -c "import secrets; print(secrets.token_hex(32))"</code>
+                    </p>
+                </div>
+
+                <h3>2. File <code>backend/.env</code></h3>
+                <pre><span class="keyword">FLASK_APP</span>=main.py
+<span class="keyword">FLASK_ENV</span>=<span class="string">production</span>
+<span class="keyword">SECRET_KEY</span>=<span class="string">GANTI_DENGAN_SECRET_KEY_RANDOM</span>
+<span class="keyword">JWT_SECRET_KEY</span>=<span class="string">GANTI_DENGAN_JWT_SECRET_RANDOM</span>
+<span class="keyword">DATABASE_URL</span>=<span class="string">mysql+pymysql://notes_user:PASSWORD_DB@cuynotes_db:3306/cuynotes</span></pre>
+
+                <h3>3. File <code>client/.env</code></h3>
+                <pre><span class="comment"># Ganti dengan IP/domain server kamu</span>
+<span class="keyword">NEXT_PUBLIC_API_URL</span>=<span class="string">http://IP_SERVER_KAMU:5001/api</span></pre>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Catatan:</strong> Pastikan password di <code>DATABASE_URL</code> backend sama persis
+                        dengan <code>MYSQL_PASSWORD</code> di docker-compose.yml. Inkonsistensi akan menyebabkan koneksi
+                        gagal.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Docker Deploy -->
+        <section id="docker-deploy">
+            <div class="section-card">
+                <h2><span class="icon">🐳</span> Deploy dengan Docker</h2>
+                <p>Berikut panduan langkah demi langkah untuk menjalankan CuyNotes di server baru. Pilih salah satu cara
+                    sesuai yang kamu gunakan:</p>
+            </div>
+
+            <!-- Tabs -->
+            <div style="margin-top: 16px;">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('desktop')">
+                        🖥️ Docker Desktop
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('cli')">
+                        ⌨️ Docker CLI
+                    </button>
+                </div>
+
+                <!-- Docker Desktop Tab -->
+                <div id="tab-desktop" class="tab-content active">
+                    <h3>Cara 1: Menggunakan Docker Desktop</h3>
+                    <p>Cocok untuk pengguna <strong>macOS</strong> dan <strong>Windows</strong> yang prefer GUI.</p>
+
+                    <ol class="step-list">
+                        <li>
+                            <strong>Install Docker Desktop</strong>
+                            <p>Download dan install Docker Desktop dari <a
+                                    href="https://www.docker.com/products/docker-desktop/" target="_blank"
+                                    style="color: #3b82f6;">docker.com/products/docker-desktop</a>. Pilih sesuai OS kamu
+                                (macOS Intel/Apple Silicon, atau Windows).</p>
+                        </li>
+                        <li>
+                            <strong>Buka Docker Desktop</strong>
+                            <p>Jalankan aplikasi Docker Desktop dan tunggu hingga status di taskbar/menubar menunjukkan
+                                <span class="badge green">Running</span>. Icon Docker berubah hijau berarti Docker
+                                engine sudah aktif.
+                            </p>
+                        </li>
+                        <li>
+                            <strong>Copy project ke server</strong>
+                            <p>Transfer folder <code>notes-app</code> ke server menggunakan salah satu cara berikut:</p>
+                            <pre><span class="comment"># Opsi 1: via Git (jika sudah di repository)</span>
+<span class="command">git clone</span> https://github.com/username/notes-app.git
+<span class="command">cd</span> notes-app
+
+<span class="comment"># Opsi 2: via SCP (dari laptop ke server)</span>
+<span class="command">scp</span> -r ./notes-app user@server-ip:/path/tujuan/
+
+<span class="comment"># Opsi 3: via USB / direct copy</span>
+<span class="comment"># Copy manual folder notes-app ke server</span></pre>
+                        </li>
+                        <li>
+                            <strong>Konfigurasi environment</strong>
+                            <p>Edit file-file environment sesuai panduan di <a href="#environment"
+                                    style="color: #3b82f6;">bagian Konfigurasi Environment</a>. Pastikan semua password
+                                dan secret key sudah diganti.</p>
+                        </li>
+                        <li>
+                            <strong>Buka Terminal di folder project</strong>
+                            <p>Buka Terminal (atau PowerShell di Windows) dan navigasi ke folder project:</p>
+                            <pre><span class="command">cd</span> /path/ke/notes-app</pre>
+                        </li>
+                        <li>
+                            <strong>Build dan jalankan semua container</strong>
+                            <p>Jalankan perintah berikut untuk build images dan start semua container:</p>
+                            <pre><span class="command">docker-compose up --build -d</span></pre>
+                            <p>Perintah ini akan:</p>
+                            <ul style="padding-left: 20px; color: #475569; margin-bottom: 6px;">
+                                <li>🔨 Build Docker image untuk frontend (Next.js)</li>
+                                <li>🔨 Build Docker image untuk backend (Flask)</li>
+                                <li>📥 Download image MySQL 8.0 (jika belum ada)</li>
+                                <li>🚀 Start semua 3 container secara otomatis</li>
+                            </ul>
+                            <div class="info-box info">
+                                <div class="icon-box">⏱️</div>
+                                <p>Proses build pertama kali bisa memakan waktu <strong>3-5 menit</strong> tergantung
+                                    kecepatan internet untuk download dependencies.</p>
+                            </div>
+                        </li>
+                        <li>
+                            <strong>Verifikasi di Docker Desktop</strong>
+                            <p>Buka Docker Desktop → Tab <strong>Containers</strong>. Kamu akan melihat 3 container:</p>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Container</th>
+                                        <th>Status</th>
+                                        <th>Port</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>cuynotes_db</strong></td>
+                                        <td><span class="badge green">Running (healthy)</span></td>
+                                        <td>3306</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>backend_flask</strong></td>
+                                        <td><span class="badge green">Running</span></td>
+                                        <td>5001</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>frontend_nextjs</strong></td>
+                                        <td><span class="badge green">Running</span></td>
+                                        <td>3000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </li>
+                        <li>
+                            <strong>Buka aplikasi di browser</strong>
+                            <p>Akses <a href="http://localhost:3000" style="color: #3b82f6;">http://localhost:3000</a>
+                                (atau <code>http://IP_SERVER:3000</code> jika dari komputer lain).</p>
+                        </li>
+                    </ol>
+
+                    <div class="info-box tip">
+                        <div class="icon-box">💡</div>
+                        <p><strong>Docker Desktop Tips:</strong> Kamu bisa melihat logs dari setiap container dengan
+                            klik nama container di Docker Desktop → Tab "Logs". Sangat berguna untuk debugging!</p>
+                    </div>
+                </div>
+
+                <!-- Docker CLI Tab -->
+                <div id="tab-cli" class="tab-content">
+                    <h3>Cara 2: Menggunakan Docker CLI (Command Line)</h3>
+                    <p>Cocok untuk pengguna <strong>Linux Server</strong> tanpa GUI, atau yang prefer command line.</p>
+
+                    <ol class="step-list">
+                        <li>
+                            <strong>Install Docker Engine & Docker Compose</strong>
+                            <p>Untuk Ubuntu/Debian:</p>
+                            <pre><span class="comment"># Update package list</span>
+<span class="command">sudo apt update</span>
+
+<span class="comment"># Install dependencies</span>
+<span class="command">sudo apt install -y</span> apt-transport-https ca-certificates curl software-properties-common
+
+<span class="comment"># Add Docker GPG key</span>
+<span class="command">curl -fsSL</span> https://download.docker.com/linux/ubuntu/gpg | <span class="command">sudo gpg --dearmor -o</span> /usr/share/keyrings/docker-archive-keyring.gpg
+
+<span class="comment"># Add Docker repository</span>
+<span class="command">echo</span> "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | <span class="command">sudo tee</span> /etc/apt/sources.list.d/docker.list > /dev/null
+
+<span class="comment"># Install Docker</span>
+<span class="command">sudo apt update</span>
+<span class="command">sudo apt install -y</span> docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+<span class="comment"># Tambahkan user ke docker group (agar tidak perlu sudo)</span>
+<span class="command">sudo usermod -aG docker</span> $USER
+<span class="command">newgrp docker</span></pre>
+
+                            <p>Untuk CentOS/RHEL/Fedora:</p>
+                            <pre><span class="comment"># Install Docker</span>
+<span class="command">sudo yum install -y</span> yum-utils
+<span class="command">sudo yum-config-manager --add-repo</span> https://download.docker.com/linux/centos/docker-ce.repo
+<span class="command">sudo yum install -y</span> docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+<span class="comment"># Start Docker</span>
+<span class="command">sudo systemctl start docker</span>
+<span class="command">sudo systemctl enable docker</span>
+
+<span class="comment"># Tambahkan user ke docker group</span>
+<span class="command">sudo usermod -aG docker</span> $USER</pre>
+                        </li>
+                        <li>
+                            <strong>Verifikasi instalasi Docker</strong>
+                            <pre><span class="comment"># Cek Docker version</span>
+<span class="command">docker --version</span>
+<span class="comment"># Output: Docker version 24.x.x, build xxxxxxx</span>
+
+<span class="comment"># Cek Docker Compose version</span>
+<span class="command">docker compose version</span>
+<span class="comment"># Output: Docker Compose version v2.x.x</span>
+
+<span class="comment"># Test Docker running</span>
+<span class="command">docker run hello-world</span></pre>
+                        </li>
+                        <li>
+                            <strong>Transfer project ke server</strong>
+                            <pre><span class="comment"># Opsi 1: via Git</span>
+<span class="command">git clone</span> https://github.com/username/notes-app.git
+<span class="command">cd</span> notes-app
+
+<span class="comment"># Opsi 2: via SCP dari laptop</span>
+<span class="command">scp</span> -r ./notes-app user@server-ip:~/
+
+<span class="comment"># Opsi 3: via rsync (lebih cepat untuk file banyak)</span>
+<span class="command">rsync</span> -avz --progress ./notes-app user@server-ip:~/</pre>
+                        </li>
+                        <li>
+                            <strong>Konfigurasi environment</strong>
+                            <pre><span class="command">cd</span> ~/notes-app
+
+<span class="comment"># Edit docker-compose.yml</span>
+<span class="command">nano</span> docker-compose.yml
+
+<span class="comment"># Edit backend/.env</span>
+<span class="command">nano</span> backend/.env
+
+<span class="comment"># Edit client/.env (ganti localhost ke IP server)</span>
+<span class="command">nano</span> client/.env</pre>
+                            <div class="info-box warning">
+                                <div class="icon-box">⚠️</div>
+                                <p>Jangan lupa ganti <code>NEXT_PUBLIC_API_URL</code> di <code>client/.env</code> ke IP
+                                    publik server kamu, misalnya: <code>http://203.0.113.50:5001/api</code></p>
+                            </div>
+                        </li>
+                        <li>
+                            <strong>Build dan jalankan semua container</strong>
+                            <pre><span class="comment"># Build images dan start containers (detached mode)</span>
+<span class="command">docker compose up --build -d</span>
+
+<span class="comment"># Catatan: untuk docker-compose versi lama gunakan</span>
+<span class="command">docker-compose up --build -d</span></pre>
+                        </li>
+                        <li>
+                            <strong>Monitor proses start-up</strong>
+                            <pre><span class="comment"># Lihat status semua containers</span>
+<span class="command">docker ps</span>
+
+<span class="comment"># Output yang diharapkan:</span>
+<span class="comment"># NAMES             STATUS                    PORTS</span>
+<span class="comment"># frontend_nextjs   Up 10 seconds             0.0.0.0:3000->3000</span>
+<span class="comment"># backend_flask     Up 10 seconds             0.0.0.0:5001->5001</span>
+<span class="comment"># cuynotes_db       Up 20 seconds (healthy)   0.0.0.0:3306->3306</span>
+
+<span class="comment"># Lihat logs semua container secara real-time</span>
+<span class="command">docker compose logs -f</span>
+
+<span class="comment"># Lihat logs per container</span>
+<span class="command">docker logs backend_flask</span>
+<span class="command">docker logs frontend_nextjs</span>
+<span class="command">docker logs cuynotes_db</span></pre>
+                        </li>
+                        <li>
+                            <strong>Verifikasi dengan curl</strong>
+                            <pre><span class="comment"># Test backend API</span>
+<span class="command">curl</span> http://localhost:5001/api/notes
+<span class="comment"># Seharusnya return JSON: {"notes": [], "total": 0, ...}</span>
+
+<span class="comment"># Test frontend</span>
+<span class="command">curl</span> -I http://localhost:3000
+<span class="comment"># Seharusnya return: HTTP/1.1 200 OK</span></pre>
+                        </li>
+                        <li>
+                            <strong>Buka di browser</strong>
+                            <p>Akses <code>http://IP_SERVER:3000</code> dari browser komputer lain.</p>
+                        </li>
+                    </ol>
+
+                    <div class="info-box tip">
+                        <div class="icon-box">💡</div>
+                        <p><strong>Firewall:</strong> Jika menggunakan server cloud (AWS, GCP, dll), pastikan port
+                            <strong>3000</strong> dan <strong>5001</strong> dibuka di Security Group / Firewall rules.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Verify -->
+        <section id="verify">
+            <div class="section-card">
+                <h2><span class="icon">✅</span> Verifikasi & Testing</h2>
+                <p>Setelah semua container running, lakukan verifikasi berikut:</p>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Cek semua container berjalan</strong>
+                        <pre><span class="command">docker ps --format</span> "table {{.Names}}\t{{.Status}}\t{{.Ports}}"</pre>
+                        <p>Pastikan ketiga container menunjukkan status <span class="badge green">Up</span> dan database
+                            <span class="badge green">healthy</span>.
+                        </p>
+                    </li>
+                    <li>
+                        <strong>Test halaman Register</strong>
+                        <p>Buka <code>http://IP_SERVER:3000/register</code> dan buat akun baru. Jika berhasil redirect
+                            ke halaman utama, artinya frontend ↔ backend ↔ database semua terhubung dengan baik.</p>
+                    </li>
+                    <li>
+                        <strong>Test Create Note</strong>
+                        <p>Buat note baru dengan ketiga jenis visibilitas:</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>🌐 <strong>Public</strong> — Buat dan pastikan muncul di halaman Explore</li>
+                            <li>🔒 <strong>Private</strong> — Buat dan pastikan tidak muncul di Explore, hanya di My
+                                Notes</li>
+                            <li>🛡️ <strong>Protected</strong> — Buat dengan password, pastikan diminta password saat
+                                buka</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Test Password Protection</strong>
+                        <p>Pada note protected, coba:</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>Buka note → harus diminta password</li>
+                            <li>Masukkan password salah → harus ada error</li>
+                            <li>Edit note → ubah visibility ke public → harus diminta password lama + konfirmasi</li>
+                            <li>Ganti password → harus masukkan password lama + password akun</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Test Favorites & Search</strong>
+                        <p>Cek fitur favorite (klik bintang) dan search (ketik di kolom pencarian).</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 7: Management -->
+        <section id="management">
+            <div class="section-card">
+                <h2><span class="icon">🔧</span> Manajemen Container</h2>
+                <p>Perintah-perintah yang sering digunakan untuk mengelola aplikasi:</p>
+
+                <h3>Perintah Dasar</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aksi</th>
+                            <th>Perintah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Start semua container</td>
+                            <td><code>docker compose up -d</code></td>
+                        </tr>
+                        <tr>
+                            <td>Stop semua container</td>
+                            <td><code>docker compose down</code></td>
+                        </tr>
+                        <tr>
+                            <td>Restart semua container</td>
+                            <td><code>docker compose restart</code></td>
+                        </tr>
+                        <tr>
+                            <td>Rebuild & start ulang</td>
+                            <td><code>docker compose up --build -d</code></td>
+                        </tr>
+                        <tr>
+                            <td>Lihat logs real-time</td>
+                            <td><code>docker compose logs -f</code></td>
+                        </tr>
+                        <tr>
+                            <td>Lihat log container tertentu</td>
+                            <td><code>docker logs backend_flask</code></td>
+                        </tr>
+                        <tr>
+                            <td>Masuk ke dalam container</td>
+                            <td><code>docker exec -it backend_flask bash</code></td>
+                        </tr>
+                        <tr>
+                            <td>Lihat resource usage</td>
+                            <td><code>docker stats</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Database Backup & Restore</h3>
+                <pre><span class="comment"># Backup database</span>
+<span class="command">docker exec cuynotes_db</span> mysqldump -u notes_user -pnotes_password cuynotes > backup.sql
+
+<span class="comment"># Restore database</span>
+<span class="command">docker exec -i cuynotes_db</span> mysql -u notes_user -pnotes_password cuynotes < backup.sql</pre>
+
+                <h3>Update Aplikasi</h3>
+                <pre><span class="comment"># Pull perubahan terbaru (jika via Git)</span>
+<span class="command">git pull origin main</span>
+
+<span class="comment"># Rebuild dan restart containers</span>
+<span class="command">docker compose up --build -d</span></pre>
+
+                <h3>Hapus Semua Data (Reset)</h3>
+                <pre><span class="comment"># Stop dan hapus containers + volumes (DATABASE AKAN HILANG!)</span>
+<span class="command">docker compose down -v</span>
+
+<span class="comment"># Start fresh</span>
+<span class="command">docker compose up --build -d</span></pre>
+
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>WARNING:</strong> Perintah <code>docker compose down -v</code> akan menghapus seluruh
+                        data database! Pastikan backup terlebih dahulu.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: MySQL Access -->
+        <section id="mysql-access">
+            <div class="section-card">
+                <h2><span class="icon">🗄️</span> Akses Database MySQL</h2>
+                <p>Berikut cara mengakses database MySQL yang berjalan di dalam Docker container untuk melihat,
+                    mengelola, atau debugging data.</p>
+
+                <h3>Cara 1: Masuk via Docker CLI</h3>
+                <p>Cara paling mudah dan cepat untuk mengakses MySQL langsung dari terminal:</p>
+
+                <pre><span class="comment"># Masuk ke MySQL shell di dalam container</span>
+<span class="command">docker exec -it cuynotes_db</span> mysql -u notes_user -pnotes_password cuynotes
+
+<span class="comment"># Atau jika password sudah diganti (production)</span>
+<span class="command">docker exec -it cuynotes_db</span> mysql -u notes_user -p<span class="string">PASSWORD_KAMU</span> cuynotes</pre>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips:</strong> Tidak ada spasi antara <code>-p</code> dan password. Contoh:
+                        <code>-pnotes_password</code> (benar) vs <code>-p notes_password</code> (salah).</p>
+                </div>
+
+                <h3>Cara 2: Akses sebagai Root</h3>
+                <pre><span class="comment"># Login sebagai root (akses penuh)</span>
+<span class="command">docker exec -it cuynotes_db</span> mysql -u root -proot_password</pre>
+
+                <h3>Cara 3: Via MySQL Client Eksternal</h3>
+                <p>Kamu juga bisa menggunakan GUI tools seperti <strong>MySQL Workbench</strong>,
+                    <strong>DBeaver</strong>, <strong>TablePlus</strong>, atau <strong>phpMyAdmin</strong>:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Host</strong></td>
+                            <td><code>localhost</code> (atau IP server)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Port</strong></td>
+                            <td><code>3306</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Username</strong></td>
+                            <td><code>notes_user</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password</strong></td>
+                            <td><code>notes_password</code> (default)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Database</strong></td>
+                            <td><code>cuynotes</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Perintah SQL yang Berguna</h3>
+                <p>Setelah masuk ke MySQL shell, gunakan perintah berikut untuk eksplorasi database:</p>
+
+                <pre><span class="comment">-- Lihat semua database</span>
+<span class="command">SHOW DATABASES;</span>
+
+<span class="comment">-- Pilih database cuynotes</span>
+<span class="command">USE cuynotes;</span>
+
+<span class="comment">-- Lihat semua tabel</span>
+<span class="command">SHOW TABLES;</span>
+
+<span class="comment">-- Lihat struktur tabel users</span>
+<span class="command">DESCRIBE users;</span>
+
+<span class="comment">-- Lihat struktur tabel notes</span>
+<span class="command">DESCRIBE notes;</span>
+
+<span class="comment">-- Lihat semua user yang terdaftar</span>
+<span class="command">SELECT</span> id, username, email, created_at <span class="command">FROM</span> users;
+
+<span class="comment">-- Lihat semua notes (tanpa content untuk ringkas)</span>
+<span class="command">SELECT</span> id, title, visibility, user_id, created_at <span class="command">FROM</span> notes;
+
+<span class="comment">-- Lihat notes milik user tertentu</span>
+<span class="command">SELECT</span> n.id, n.title, n.visibility, u.username
+<span class="command">FROM</span> notes n
+<span class="command">JOIN</span> users u <span class="command">ON</span> n.user_id = u.id
+<span class="command">WHERE</span> u.username = <span class="string">'nama_user'</span>;
+
+<span class="comment">-- Hitung total notes per visibilitas</span>
+<span class="command">SELECT</span> visibility, <span class="command">COUNT</span>(*) as total <span class="command">FROM</span> notes <span class="command">GROUP BY</span> visibility;
+
+<span class="comment">-- Lihat favorites</span>
+<span class="command">SELECT</span> f.id, u.username, n.title
+<span class="command">FROM</span> favorites f
+<span class="command">JOIN</span> users u <span class="command">ON</span> f.user_id = u.id
+<span class="command">JOIN</span> notes n <span class="command">ON</span> f.note_id = n.id;
+
+<span class="comment">-- Keluar dari MySQL shell</span>
+<span class="command">EXIT;</span></pre>
+
+                <h3>Database Schema</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tabel</th>
+                            <th>Kolom Utama</th>
+                            <th>Fungsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>users</strong></td>
+                            <td><code>id</code>, <code>username</code>, <code>email</code>, <code>password_hash</code>
+                            </td>
+                            <td>Data pengguna &amp; autentikasi</td>
+                        </tr>
+                        <tr>
+                            <td><strong>notes</strong></td>
+                            <td><code>id</code>, <code>title</code>, <code>content</code>, <code>visibility</code>,
+                                <code>password_hash</code>, <code>user_id</code></td>
+                            <td>Data catatan dengan proteksi password</td>
+                        </tr>
+                        <tr>
+                            <td><strong>favorites</strong></td>
+                            <td><code>id</code>, <code>user_id</code>, <code>note_id</code></td>
+                            <td>Relasi user-note favorit</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>PERINGATAN:</strong> Jangan pernah mengedit <code>password_hash</code> secara manual di
+                        database! Password di-hash menggunakan <strong>bcrypt</strong> dan tidak bisa di-decode. Jika
+                        user lupa password, buat akun baru atau reset via aplikasi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Troubleshooting -->
+        <section id="troubleshooting">
+            <div class="section-card">
+                <h2><span class="icon">🛠️</span> Troubleshooting</h2>
+                <p>Solusi untuk masalah yang sering ditemui:</p>
+
+                <h3>❌ Container database tidak mau start</h3>
+                <pre><span class="comment"># Cek logs database</span>
+<span class="command">docker logs cuynotes_db</span>
+
+<span class="comment"># Biasanya karena port 3306 sudah dipakai. Solusi:</span>
+<span class="comment"># 1. Stop MySQL yang sudah berjalan</span>
+<span class="command">sudo systemctl stop mysql</span>
+
+<span class="comment"># 2. Atau ubah port mapping di docker-compose.yml</span>
+<span class="comment"># ports: "3307:3306"</span></pre>
+
+                <h3>❌ Backend tidak bisa connect ke database</h3>
+                <pre><span class="comment"># Pastikan database sudah healthy sebelum backend start</span>
+<span class="command">docker ps</span>
+
+<span class="comment"># Jika database belum healthy, tunggu 10-20 detik lalu</span>
+<span class="command">docker compose restart backend_flask</span>
+
+<span class="comment"># Cek connection string di docker-compose.yml</span>
+<span class="comment"># DATABASE_URL harus match dengan MYSQL_USER dan MYSQL_PASSWORD</span></pre>
+
+                <h3>❌ Frontend tidak bisa akses backend API</h3>
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p>Pastikan <code>NEXT_PUBLIC_API_URL</code> di <code>client/.env</code> mengarah ke IP/domain yang
+                        benar. Jika deploy ke server remote, jangan pakai <code>localhost</code> — gunakan IP publik
+                        server.</p>
+                </div>
+                <pre><span class="comment"># Update .env dan rebuild frontend</span>
+<span class="command">nano</span> client/.env
+<span class="comment"># Ubah ke: NEXT_PUBLIC_API_URL=http://IP_SERVER:5001/api</span>
+
+<span class="command">docker compose up --build -d frontend_nextjs</span></pre>
+
+                <h3>❌ Port sudah dipakai (Address already in use)</h3>
+                <pre><span class="comment"># Cari proses yang menggunakan port</span>
+<span class="command">lsof -i :3000</span>   <span class="comment"># atau :5001 atau :3306</span>
+
+<span class="comment"># Kill proses tersebut</span>
+<span class="command">kill -9</span> &lt;PID&gt;
+
+<span class="comment"># Atau ubah port mapping di docker-compose.yml</span>
+<span class="comment"># ports: "8080:3000"  (akses via localhost:8080)</span></pre>
+
+                <h3>❌ Perubahan code tidak ter-reflect</h3>
+                <pre><span class="comment"># Rebuild tanpa cache</span>
+<span class="command">docker compose build --no-cache</span>
+<span class="command">docker compose up -d</span></pre>
+
+                <h3>❌ Disk penuh / cleanup</h3>
+                <pre><span class="comment"># Hapus images dan containers yang tidak terpakai</span>
+<span class="command">docker system prune -a</span>
+
+<span class="comment"># Hapus volumes yang tidak terpakai</span>
+<span class="command">docker volume prune</span></pre>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>📝 <strong>CuyNotes Deployment Guide</strong> — Dibuat untuk memudahkan deployment di server manapun.</p>
+            <p style="margin-top: 8px;">Next.js + Flask + MySQL + Docker | Built with ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Remove active from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Activate selected tab
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            // Activate corresponding button
+            const buttons = document.querySelectorAll('.tab-btn');
+            if (tab === 'desktop') {
+                buttons[0].classList.add('active');
+            } else {
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
