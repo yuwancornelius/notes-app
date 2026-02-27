@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuyNotes - aaPanel Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.7;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+            padding: 60px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .hero h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 400;
+            position: relative;
+        }
+
+        .hero .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 32px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero .repo-link {
+            display: inline-block;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* TOC */
+        .toc {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: -40px;
+            position: relative;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .toc h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: #ea580c;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .toc .step-num {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Sections */
+        section {
+            margin-top: 40px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+        }
+
+        section h2 {
+            font-size: 1.45rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        section h2 .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        section h3 {
+            font-size: 1.12rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 24px 0 12px;
+        }
+
+        section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #475569;
+            margin: 18px 0 10px;
+        }
+
+        section p {
+            color: #475569;
+            margin-bottom: 14px;
+        }
+
+        /* Code */
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 14px 0 18px;
+            font-family: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            border: 1px solid #1e293b;
+        }
+
+        pre .comment {
+            color: #64748b;
+        }
+
+        pre .command {
+            color: #22d3ee;
+        }
+
+        pre .string {
+            color: #a5f3fc;
+        }
+
+        pre .keyword {
+            color: #f472b6;
+        }
+
+        pre .highlight {
+            color: #fbbf24;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.86em;
+            color: #dc2626;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Info boxes */
+        .info-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box .icon-box {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .info-box.tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .info-box.tip p {
+            color: #166534;
+            margin: 0;
+        }
+
+        .info-box.warning {
+            background: #fefce8;
+            border: 1px solid #fde68a;
+        }
+
+        .info-box.warning p {
+            color: #854d0e;
+            margin: 0;
+        }
+
+        .info-box.danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .info-box.danger p {
+            color: #991b1b;
+            margin: 0;
+        }
+
+        .info-box.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .info-box.info p {
+            color: #1e40af;
+            margin: 0;
+        }
+
+        /* Step list */
+        .step-list {
+            counter-reset: steps;
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            counter-increment: steps;
+            padding: 18px 0 18px 56px;
+            position: relative;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 18px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step-list li strong {
+            display: block;
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .step-list li p {
+            margin: 0 0 8px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge.blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge.orange {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+            margin: 32px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* Phase header */
+        .phase-header {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px 12px 0 0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .phase-content {
+            background: white;
+            padding: 28px;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Nginx config block */
+        .config-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 14px 0 18px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.84rem;
+            line-height: 1.7;
+            border: 1px solid #334155;
+            white-space: pre;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .toc ul {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="container">
+            <div class="logo-icon">🖥️</div>
+            <h1>aaPanel Deployment Guide</h1>
+            <p class="subtitle">Panduan deploy CuyNotes ke server menggunakan aaPanel Free</p>
+            <br>
+            <a href="https://github.com/yuwancornelius/notes-app" target="_blank" class="repo-link">⭐
+                github.com/yuwancornelius/notes-app</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- TOC -->
+        <div class="toc">
+            <h2>📋 Daftar Isi</h2>
+            <ul>
+                <li><a href="#prerequisites"><span class="step-num">1</span> Prerequisites</a></li>
+                <li><a href="#install-aapanel"><span class="step-num">2</span> Install aaPanel</a></li>
+                <li><a href="#install-software"><span class="step-num">3</span> Install Software di aaPanel</a></li>
+                <li><a href="#setup-database"><span class="step-num">4</span> Setup Database MySQL</a></li>
+                <li><a href="#clone-project"><span class="step-num">5</span> Clone Project dari GitHub</a></li>
+                <li><a href="#setup-backend"><span class="step-num">6</span> Setup Backend (Flask)</a></li>
+                <li><a href="#setup-frontend"><span class="step-num">7</span> Setup Frontend (Next.js)</a></li>
+                <li><a href="#setup-nginx"><span class="step-num">8</span> Konfigurasi Nginx Reverse Proxy</a></li>
+                <li><a href="#setup-pm2"><span class="step-num">9</span> Setup Auto-Start (PM2)</a></li>
+                <li><a href="#firewall"><span class="step-num">10</span> Konfigurasi Firewall</a></li>
+                <li><a href="#verify"><span class="step-num">11</span> Verifikasi & Testing</a></li>
+                <li><a href="#troubleshooting"><span class="step-num">12</span> Troubleshooting</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Prerequisites -->
+        <section id="prerequisites">
+            <div class="section-card">
+                <h2><span class="icon">📋</span> Prerequisites</h2>
+                <p>Sebelum mulai, pastikan kamu memiliki hal-hal berikut:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kebutuhan</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>VPS / Server</strong></td>
+                            <td>Minimal 1 CPU, 2GB RAM, 20GB SSD — Ubuntu 20.04/22.04 atau CentOS 7/8</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Akses Root</strong></td>
+                            <td>Akses SSH sebagai <code>root</code> ke server</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IP Publik</strong></td>
+                            <td>IP publik server (contoh: <code>103.xxx.xxx.xxx</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Domain</strong> (opsional)</td>
+                            <td>Domain yang sudah diarahkan ke IP server (contoh: <code>notes.domain.com</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info">
+                    <div class="icon-box">ℹ️</div>
+                    <p>VPS bisa dari provider manapun: <strong>DigitalOcean</strong>, <strong>Vultr</strong>,
+                        <strong>Linode</strong>, <strong>AWS Lightsail</strong>, <strong>IDCloudHost</strong>,
+                        <strong>Biznet Gio</strong>, dll. Pilih lokasi server terdekat untuk latency rendah.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Install aaPanel -->
+        <section id="install-aapanel">
+            <div class="section-card">
+                <h2><span class="icon">🔧</span> Install aaPanel</h2>
+                <p>Login ke server via SSH sebagai root, lalu jalankan perintah berikut sesuai OS server kamu:</p>
+
+                <h3>Ubuntu / Debian</h3>
+                <pre><span class="command">wget -O install.sh</span> http://www.aapanel.com/script/install-ubuntu_6.0_en.sh && <span class="command">sudo bash</span> install.sh aapanel</pre>
+
+                <h3>CentOS</h3>
+                <pre><span class="command">yum install -y wget</span> && <span class="command">wget -O install.sh</span> http://www.aapanel.com/script/install_6.0_en.sh && <span class="command">bash</span> install.sh aapanel</pre>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p>Proses instalasi memakan waktu ±2-5 menit. Setelah selesai, akan muncul informasi penting,
+                        <strong>catat semua info ini</strong>:</p>
+                </div>
+
+                <pre><span class="comment"># Output setelah instalasi selesai (contoh):</span>
+<span class="highlight">aaPanel Internet Address:</span> <span class="string">http://103.xxx.xxx.xxx:7800/abcdefgh</span>
+<span class="highlight">aaPanel Internal Address:</span> <span class="string">http://192.168.x.x:7800/abcdefgh</span>
+<span class="highlight">username:</span> <span class="string">abcdefgh</span>
+<span class="highlight">password:</span> <span class="string">xxxxxxxx</span></pre>
+
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>PENTING:</strong> Simpan baik-baik URL, username, dan password aaPanel! Ini akan
+                        digunakan untuk mengakses panel administrasi.</p>
+                </div>
+
+                <h3>Login ke aaPanel</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka aaPanel di browser</strong>
+                        <p>Akses URL yang diberikan setelah instalasi (misalnya:
+                            <code>http://103.xxx.xxx.xxx:7800/abcdefgh</code>)</p>
+                    </li>
+                    <li>
+                        <strong>Login dengan username & password</strong>
+                        <p>Masukkan username dan password yang tampil di terminal tadi.</p>
+                    </li>
+                    <li>
+                        <strong>Setuju Terms of Service</strong>
+                        <p>Pada popup pertama, centang dan klik "I Agree" / "Enter Panel".</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 3: Install Software -->
+        <section id="install-software">
+            <div class="section-card">
+                <h2><span class="icon">📦</span> Install Software di aaPanel</h2>
+                <p>Setelah login ke aaPanel, kamu perlu menginstall beberapa software. Saat pertama kali login, aaPanel
+                    akan menawarkan pilihan stack. Pilih <strong>LNMP</strong> (Nginx + MySQL).</p>
+
+                <h3>LNMP Stack (Recommended)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Software</th>
+                            <th>Versi</th>
+                            <th>Tipe Instalasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Nginx</strong></td>
+                            <td>1.24+</td>
+                            <td>Fast (Compiled)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MySQL</strong></td>
+                            <td>8.0</td>
+                            <td>Fast (Compiled)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>PHP</strong></td>
+                            <td><em>Tidak diperlukan</em> — bisa diskip</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><strong>phpMyAdmin</strong></td>
+                            <td>Terbaru</td>
+                            <td>Fast</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info">
+                    <div class="icon-box">⏱️</div>
+                    <p>Proses instalasi LNMP memakan waktu ±5-15 menit. Tunggu sampai semua selesai (cek di
+                        <strong>Background Task</strong>).</p>
+                </div>
+
+                <h3>Install Tambahan via Terminal SSH</h3>
+                <p>Setelah LNMP selesai, buka terminal SSH (bisa dari aaPanel: klik <strong>"Terminal"</strong> di
+                    sidebar) dan install software tambahan:</p>
+
+                <h4>🐍 Install Python 3.11 & pip</h4>
+                <pre><span class="comment"># Ubuntu / Debian</span>
+<span class="command">sudo apt update</span>
+<span class="command">sudo apt install -y</span> python3.11 python3.11-venv python3-pip python3.11-dev
+<span class="command">sudo apt install -y</span> gcc default-libmysqlclient-dev pkg-config
+
+<span class="comment"># Jika python3.11 tidak tersedia, tambahkan repository deadsnakes:</span>
+<span class="command">sudo apt install -y</span> software-properties-common
+<span class="command">sudo add-apt-repository</span> ppa:deadsnakes/ppa -y
+<span class="command">sudo apt update</span>
+<span class="command">sudo apt install -y</span> python3.11 python3.11-venv python3.11-dev</pre>
+
+                <h4>📗 Install Node.js 20 (LTS)</h4>
+                <pre><span class="comment"># Install Node.js via NodeSource</span>
+<span class="command">curl -fsSL</span> https://deb.nodesource.com/setup_20.x | <span class="command">sudo -E bash</span> -
+<span class="command">sudo apt install -y</span> nodejs
+
+<span class="comment"># Verifikasi</span>
+<span class="command">node --version</span>   <span class="comment"># v20.x.x</span>
+<span class="command">npm --version</span>    <span class="comment"># 10.x.x</span></pre>
+
+                <h4>📦 Install PM2 (Process Manager)</h4>
+                <pre><span class="comment"># Install PM2 secara global</span>
+<span class="command">sudo npm install -g pm2</span></pre>
+
+                <h4>🔀 Install Git</h4>
+                <pre><span class="command">sudo apt install -y git</span>
+<span class="command">git --version</span></pre>
+            </div>
+        </section>
+
+        <!-- Section 4: Setup Database -->
+        <section id="setup-database">
+            <div class="section-card">
+                <h2><span class="icon">🗄️</span> Setup Database MySQL</h2>
+                <p>Buat database dan user melalui aaPanel atau terminal:</p>
+
+                <h3>Cara 1: Via aaPanel GUI</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka menu Database</strong>
+                        <p>Di sidebar aaPanel, klik <strong>"Database"</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Klik "Add Database"</strong>
+                        <p>Isi form berikut:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Database Name</strong></td>
+                                    <td><code>cuynotes</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Username</strong></td>
+                                    <td><code>cuynotes_user</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Password</strong></td>
+                                    <td>Buat password yang kuat (catat!)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Access</strong></td>
+                                    <td>Local Server (127.0.0.1)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <strong>Klik Submit</strong>
+                        <p>Database dan user akan otomatis dibuat.</p>
+                    </li>
+                </ol>
+
+                <h3>Cara 2: Via Terminal SSH</h3>
+                <pre><span class="comment"># Login ke MySQL sebagai root</span>
+<span class="command">mysql -u root -p</span>
+
+<span class="comment"># Buat database dan user</span>
+<span class="command">CREATE DATABASE</span> cuynotes <span class="command">CHARACTER SET</span> utf8mb4 <span class="command">COLLATE</span> utf8mb4_unicode_ci;
+<span class="command">CREATE USER</span> <span class="string">'cuynotes_user'</span>@<span class="string">'localhost'</span> <span class="command">IDENTIFIED BY</span> <span class="string">'PASSWORD_KAMU_DISINI'</span>;
+<span class="command">GRANT ALL PRIVILEGES ON</span> cuynotes.* <span class="command">TO</span> <span class="string">'cuynotes_user'</span>@<span class="string">'localhost'</span>;
+<span class="command">FLUSH PRIVILEGES;</span>
+<span class="command">EXIT;</span></pre>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Catat password database!</strong> Password ini akan dimasukkan ke file <code>.env</code>
+                        backend nanti.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Clone Project -->
+        <section id="clone-project">
+            <div class="section-card">
+                <h2><span class="icon">📥</span> Clone Project dari GitHub</h2>
+                <p>Clone repository CuyNotes ke direktori server:</p>
+
+                <pre><span class="comment"># Buat direktori untuk project</span>
+<span class="command">mkdir -p</span> /www/wwwroot
+<span class="command">cd</span> /www/wwwroot
+
+<span class="comment"># Clone dari GitHub</span>
+<span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git
+<span class="command">cd</span> notes-app
+
+<span class="comment"># Lihat isi project</span>
+<span class="command">ls -la</span></pre>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p>Direktori <code>/www/wwwroot/</code> adalah lokasi default website di aaPanel. Ini memudahkan
+                        integrasi dengan konfigurasi Nginx nanti.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Setup Backend -->
+        <section id="setup-backend">
+            <div class="section-card">
+                <h2><span class="icon">🐍</span> Setup Backend (Flask)</h2>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Masuk ke folder backend</strong>
+                        <pre><span class="command">cd</span> /www/wwwroot/notes-app/backend</pre>
+                    </li>
+                    <li>
+                        <strong>Buat Python virtual environment</strong>
+                        <pre><span class="command">python3.11 -m venv venv</span>
+<span class="command">source</span> venv/bin/activate</pre>
+                        <div class="info-box info">
+                            <div class="icon-box">ℹ️</div>
+                            <p>Jika <code>python3.11</code> tidak ditemukan, coba <code>python3</code>. Pastikan versi
+                                minimal Python 3.9+.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Install Python dependencies</strong>
+                        <pre><span class="command">pip install --upgrade pip</span>
+<span class="command">pip install -r requirements.txt</span></pre>
+                    </li>
+                    <li>
+                        <strong>Setup file environment</strong>
+                        <pre><span class="comment"># Copy template menjadi .env</span>
+<span class="command">cp</span> .env.example .env
+
+<span class="comment"># Edit file .env</span>
+<span class="command">nano</span> .env</pre>
+                        <p>Ubah isi file <code>.env</code> menjadi:</p>
+                        <pre><span class="keyword">FLASK_APP</span>=main.py
+<span class="keyword">FLASK_ENV</span>=<span class="string">production</span>
+<span class="keyword">SECRET_KEY</span>=<span class="string">GANTI_DENGAN_SECRET_KEY_RANDOM_KAMU</span>
+<span class="keyword">JWT_SECRET_KEY</span>=<span class="string">GANTI_DENGAN_JWT_SECRET_RANDOM_KAMU</span>
+<span class="keyword">DATABASE_URL</span>=<span class="string">mysql+pymysql://cuynotes_user:PASSWORD_DB_KAMU@localhost:3306/cuynotes</span></pre>
+
+                        <div class="info-box danger">
+                            <div class="icon-box">🚨</div>
+                            <p><strong>PENTING:</strong> Ganti <code>PASSWORD_DB_KAMU</code> dengan password database
+                                yang sudah kamu buat di Step 4. Ganti juga <code>SECRET_KEY</code> dan
+                                <code>JWT_SECRET_KEY</code> dengan string random yang panjang.</p>
+                        </div>
+
+                        <div class="info-box tip">
+                            <div class="icon-box">💡</div>
+                            <p>Generate secret key:<br><code
+                                    style="background: #dcfce7; border-color: #bbf7d0;">python3 -c "import secrets; print(secrets.token_hex(32))"</code>
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Inisialisasi database (buat tabel)</strong>
+                        <pre><span class="comment"># Pastikan masih di venv</span>
+<span class="command">source</span> venv/bin/activate
+
+<span class="comment"># Jalankan Flask untuk membuat tabel otomatis</span>
+<span class="command">python3</span> -c "from main import app; app.app_context().push()"</pre>
+                    </li>
+                    <li>
+                        <strong>Test backend</strong>
+                        <pre><span class="comment"># Jalankan backend secara manual untuk test</span>
+<span class="command">gunicorn --bind 0.0.0.0:5001 --workers 2 --timeout 120 main:app</span>
+
+<span class="comment"># Test di terminal lain</span>
+<span class="command">curl</span> http://localhost:5001/api/notes
+<span class="comment"># Harus return JSON: {"notes": [], ...}</span>
+
+<span class="comment"># Stop dengan Ctrl+C setelah test berhasil</span></pre>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 7: Setup Frontend -->
+        <section id="setup-frontend">
+            <div class="section-card">
+                <h2><span class="icon">⚛️</span> Setup Frontend (Next.js)</h2>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Masuk ke folder client</strong>
+                        <pre><span class="command">cd</span> /www/wwwroot/notes-app/client</pre>
+                    </li>
+                    <li>
+                        <strong>Install Node.js dependencies</strong>
+                        <pre><span class="command">npm install</span></pre>
+                        <div class="info-box info">
+                            <div class="icon-box">⏱️</div>
+                            <p>Proses ini bisa memakan waktu ±1-3 menit tergantung kecepatan internet server.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Setup file environment</strong>
+                        <pre><span class="comment"># Copy template menjadi .env</span>
+<span class="command">cp</span> .env.example .env
+
+<span class="comment"># Edit file .env</span>
+<span class="command">nano</span> .env</pre>
+                        <p>Ubah isi file <code>.env</code> menjadi:</p>
+                        <pre><span class="comment"># Ganti dengan domain atau IP server kamu</span>
+<span class="keyword">NEXT_PUBLIC_API_URL</span>=<span class="string">http://IP_ATAU_DOMAIN_SERVER:5001/api</span>
+
+<span class="comment"># Contoh dengan IP:</span>
+<span class="comment"># NEXT_PUBLIC_API_URL=http://103.xxx.xxx.xxx:5001/api</span>
+
+<span class="comment"># Contoh dengan domain:</span>
+<span class="comment"># NEXT_PUBLIC_API_URL=http://notes.domain.com:5001/api</span>
+
+<span class="comment"># Jika menggunakan Nginx reverse proxy (recommended):</span>
+<span class="comment"># NEXT_PUBLIC_API_URL=http://notes.domain.com/api</span></pre>
+                    </li>
+                    <li>
+                        <strong>Build frontend untuk production</strong>
+                        <pre><span class="command">npm run build</span></pre>
+                        <div class="info-box info">
+                            <div class="icon-box">⏱️</div>
+                            <p>Build production memakan waktu ±1-3 menit. Ini mengoptimasi code untuk performa terbaik.
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Test frontend</strong>
+                        <pre><span class="comment"># Jalankan frontend secara manual untuk test</span>
+<span class="command">npm run start</span>
+
+<span class="comment"># Test di terminal lain</span>
+<span class="command">curl</span> -I http://localhost:3000
+<span class="comment"># Harus return: HTTP/1.1 200 OK</span>
+
+<span class="comment"># Stop dengan Ctrl+C</span></pre>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 8: Nginx -->
+        <section id="setup-nginx">
+            <div class="section-card">
+                <h2><span class="icon">🌐</span> Konfigurasi Nginx Reverse Proxy</h2>
+                <p>Nginx digunakan sebagai reverse proxy agar frontend dan backend API bisa diakses melalui satu
+                    domain/IP tanpa perlu menyebutkan port.</p>
+
+                <h3>Cara 1: Via aaPanel GUI</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka menu Website → Add Site</strong>
+                        <p>Di sidebar aaPanel, klik <strong>"Website"</strong> → <strong>"Add site"</strong>.</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Domain</strong></td>
+                                    <td>Domain kamu atau IP server</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Root Directory</strong></td>
+                                    <td><code>/www/wwwroot/notes-app</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PHP Version</strong></td>
+                                    <td>Static (tidak perlu PHP)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Database</strong></td>
+                                    <td>Tidak perlu buat lagi</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <strong>Edit Nginx Config</strong>
+                        <p>Setelah site dibuat, klik nama site → Tab <strong>"Config"</strong> (atau "Conf"). Hapus
+                            semua isinya, lalu ganti dengan konfigurasi berikut:</p>
+                    </li>
+                </ol>
+
+                <h3>Nginx Config (Salin dan tempel)</h3>
+                <div class="config-block">server {
+                    listen 80;
+                    server_name <span class="highlight">DOMAIN_ATAU_IP_KAMU</span>;
+
+                    # Logging
+                    access_log /www/wwwlogs/cuynotes.log;
+                    error_log /www/wwwlogs/cuynotes.error.log;
+
+                    # Frontend Next.js (port 3000)
+                    location / {
+                    proxy_pass http://127.0.0.1:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_cache_bypass $http_upgrade;
+                    }
+
+                    # Backend Flask API (port 5001)
+                    location /api/ {
+                    proxy_pass http://127.0.0.1:5001/api/;
+                    proxy_http_version 1.1;
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    }
+                    }</div>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p>Ganti <code>DOMAIN_ATAU_IP_KAMU</code> dengan domain atau IP publik server kamu. Contoh:
+                        <code>notes.domain.com</code> atau <code>103.xxx.xxx.xxx</code>.</p>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Jika menggunakan Nginx reverse proxy</strong>, update <code>client/.env</code>
+                        menjadi:<br>
+                        <code
+                            style="background: #dcfce7; border-color: #bbf7d0;">NEXT_PUBLIC_API_URL=http://DOMAIN_ATAU_IP_KAMU/api</code><br>
+                        Tanpa port <code>:5001</code> karena Nginx sudah meng-handle routing. Setelah diubah, rebuild
+                        frontend: <code>cd /www/wwwroot/notes-app/client && npm run build</code>, lalu restart PM2.
+                    </p>
+                </div>
+
+                <h3>Cara 2: Via Terminal</h3>
+                <pre><span class="comment"># Edit Nginx config langsung</span>
+<span class="command">nano</span> /www/server/panel/vhost/nginx/DOMAIN_KAMU.conf
+
+<span class="comment"># Paste konfigurasi di atas, lalu simpan</span>
+
+<span class="comment"># Test konfigurasi Nginx</span>
+<span class="command">nginx -t</span>
+
+<span class="comment"># Reload Nginx</span>
+<span class="command">nginx -s reload</span></pre>
+            </div>
+        </section>
+
+        <!-- Section 9: PM2 -->
+        <section id="setup-pm2">
+            <div class="section-card">
+                <h2><span class="icon">🔄</span> Setup Auto-Start (PM2)</h2>
+                <p>Gunakan <strong>PM2</strong> untuk menjalankan backend dan frontend secara otomatis, dan restart
+                    otomatis jika crash atau server reboot.</p>
+
+                <h3>Buat konfigurasi PM2</h3>
+                <pre><span class="comment"># Buat file konfigurasi PM2</span>
+<span class="command">nano</span> /www/wwwroot/notes-app/ecosystem.config.js</pre>
+
+                <p>Isi file <code>ecosystem.config.js</code>:</p>
+
+                <pre><span class="keyword">module.exports</span> = {
+  <span class="string">apps</span>: [
+    {
+      <span class="string">name</span>: <span class="string">'cuynotes-backend'</span>,
+      <span class="string">cwd</span>: <span class="string">'/www/wwwroot/notes-app/backend'</span>,
+      <span class="string">script</span>: <span class="string">'venv/bin/gunicorn'</span>,
+      <span class="string">args</span>: <span class="string">'--bind 127.0.0.1:5001 --workers 2 --timeout 120 main:app'</span>,
+      <span class="string">interpreter</span>: <span class="string">'none'</span>,
+      <span class="string">env</span>: {
+        <span class="string">FLASK_APP</span>: <span class="string">'main.py'</span>,
+        <span class="string">FLASK_ENV</span>: <span class="string">'production'</span>
+      }
+    },
+    {
+      <span class="string">name</span>: <span class="string">'cuynotes-frontend'</span>,
+      <span class="string">cwd</span>: <span class="string">'/www/wwwroot/notes-app/client'</span>,
+      <span class="string">script</span>: <span class="string">'node_modules/.bin/next'</span>,
+      <span class="string">args</span>: <span class="string">'start -p 3000'</span>,
+      <span class="string">interpreter</span>: <span class="string">'none'</span>
+    }
+  ]
+};</pre>
+
+                <h3>Start semua service</h3>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app
+
+<span class="comment"># Start semua apps</span>
+<span class="command">pm2 start</span> ecosystem.config.js
+
+<span class="comment"># Verifikasi semua running</span>
+<span class="command">pm2 status</span>
+
+<span class="comment"># Output yang diharapkan:</span>
+<span class="comment"># ┌─────────────────────┬────┬──────┬───────┬────────┐</span>
+<span class="comment"># │ name                │ id │ mode │ ↺     │ status │</span>
+<span class="comment"># ├─────────────────────┼────┼──────┼───────┼────────┤</span>
+<span class="comment"># │ cuynotes-backend    │ 0  │ fork │ 0     │ online │</span>
+<span class="comment"># │ cuynotes-frontend   │ 1  │ fork │ 0     │ online │</span>
+<span class="comment"># └─────────────────────┴────┴──────┴───────┴────────┘</span></pre>
+
+                <h3>Auto-start saat server reboot</h3>
+                <pre><span class="comment"># Simpan state PM2 saat ini</span>
+<span class="command">pm2 save</span>
+
+<span class="comment"># Setup auto-start saat boot</span>
+<span class="command">pm2 startup</span>
+
+<span class="comment"># Ikuti instruksi yang muncul (copy-paste perintah yang ditampilkan)</span></pre>
+
+                <h3>Perintah PM2 yang Berguna</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aksi</th>
+                            <th>Perintah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Lihat semua proses</td>
+                            <td><code>pm2 status</code></td>
+                        </tr>
+                        <tr>
+                            <td>Lihat logs real-time</td>
+                            <td><code>pm2 logs</code></td>
+                        </tr>
+                        <tr>
+                            <td>Logs backend saja</td>
+                            <td><code>pm2 logs cuynotes-backend</code></td>
+                        </tr>
+                        <tr>
+                            <td>Restart backend</td>
+                            <td><code>pm2 restart cuynotes-backend</code></td>
+                        </tr>
+                        <tr>
+                            <td>Restart frontend</td>
+                            <td><code>pm2 restart cuynotes-frontend</code></td>
+                        </tr>
+                        <tr>
+                            <td>Restart semua</td>
+                            <td><code>pm2 restart all</code></td>
+                        </tr>
+                        <tr>
+                            <td>Stop semua</td>
+                            <td><code>pm2 stop all</code></td>
+                        </tr>
+                        <tr>
+                            <td>Monitoring resource</td>
+                            <td><code>pm2 monit</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 10: Firewall -->
+        <section id="firewall">
+            <div class="section-card">
+                <h2><span class="icon">🔒</span> Konfigurasi Firewall</h2>
+                <p>Pastikan port yang diperlukan dibuka di firewall server dan aaPanel.</p>
+
+                <h3>Via aaPanel GUI</h3>
+                <p>Buka <strong>Security</strong> di sidebar aaPanel → Tab <strong>"Firewall"</strong>. Pastikan port
+                    berikut terbuka:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Protokol</th>
+                            <th>Fungsi</th>
+                            <th>Wajib?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>80</code></td>
+                            <td>TCP</td>
+                            <td>HTTP (Nginx)</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>443</code></td>
+                            <td>TCP</td>
+                            <td>HTTPS (SSL)</td>
+                            <td><span class="badge amber">Opsional</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>7800</code></td>
+                            <td>TCP</td>
+                            <td>aaPanel Dashboard</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>22</code></td>
+                            <td>TCP</td>
+                            <td>SSH</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips keamanan:</strong> Jangan buka port <code>3000</code> dan <code>5001</code> ke
+                        publik. Biarkan Nginx yang meng-handle semua traffic via port <code>80</code>/<code>443</code>.
+                        Backend dan frontend hanya listen di <code>127.0.0.1</code> (localhost).</p>
+                </div>
+
+                <h3>Via Terminal (jika pakai UFW)</h3>
+                <pre><span class="command">sudo ufw allow</span> 80/tcp
+<span class="command">sudo ufw allow</span> 443/tcp
+<span class="command">sudo ufw allow</span> 22/tcp
+<span class="command">sudo ufw allow</span> 7800/tcp
+<span class="command">sudo ufw enable</span>
+<span class="command">sudo ufw status</span></pre>
+            </div>
+        </section>
+
+        <!-- Section 11: Verify -->
+        <section id="verify">
+            <div class="section-card">
+                <h2><span class="icon">✅</span> Verifikasi & Testing</h2>
+                <p>Setelah semua selesai, lakukan verifikasi berikut:</p>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Cek PM2 status</strong>
+                        <pre><span class="command">pm2 status</span></pre>
+                        <p>Pastikan <code>cuynotes-backend</code> dan <code>cuynotes-frontend</code> berstatus <span
+                                class="badge green">online</span>.</p>
+                    </li>
+                    <li>
+                        <strong>Test backend API</strong>
+                        <pre><span class="command">curl</span> http://127.0.0.1:5001/api/notes
+<span class="comment"># Harus return JSON</span></pre>
+                    </li>
+                    <li>
+                        <strong>Test frontend</strong>
+                        <pre><span class="command">curl</span> -I http://127.0.0.1:3000
+<span class="comment"># Harus return HTTP 200</span></pre>
+                    </li>
+                    <li>
+                        <strong>Test Nginx reverse proxy</strong>
+                        <pre><span class="command">curl</span> -I http://localhost
+<span class="comment"># Harus return HTTP 200 (lewat Nginx → frontend)</span>
+
+<span class="command">curl</span> http://localhost/api/notes
+<span class="comment"># Harus return JSON (lewat Nginx → backend)</span></pre>
+                    </li>
+                    <li>
+                        <strong>Test dari browser</strong>
+                        <p>Buka <code>http://IP_SERVER_KAMU</code> atau <code>http://domain.kamu</code> di browser.</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>✅ Halaman login/register muncul</li>
+                            <li>✅ Bisa register akun baru</li>
+                            <li>✅ Bisa login</li>
+                            <li>✅ Bisa buat note (public, private, protected)</li>
+                            <li>✅ Note protected diminta password saat dibuka</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 12: Troubleshooting -->
+        <section id="troubleshooting">
+            <div class="section-card">
+                <h2><span class="icon">🛠️</span> Troubleshooting</h2>
+
+                <h3>❌ PM2: Backend error "Module not found"</h3>
+                <pre><span class="comment"># Pastikan virtual environment aktif saat install</span>
+<span class="command">cd</span> /www/wwwroot/notes-app/backend
+<span class="command">source</span> venv/bin/activate
+<span class="command">pip install -r</span> requirements.txt
+
+<span class="comment"># Restart backend</span>
+<span class="command">pm2 restart</span> cuynotes-backend</pre>
+
+                <h3>❌ Frontend: "NEXT_PUBLIC_API_URL" tidak bekerja</h3>
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><code>NEXT_PUBLIC_*</code> variabel di-embed saat build time, bukan runtime. Jadi setiap kali
+                        mengubah <code>client/.env</code>, kamu harus <strong>rebuild</strong>:</p>
+                </div>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app/client
+<span class="command">npm run build</span>
+<span class="command">pm2 restart</span> cuynotes-frontend</pre>
+
+                <h3>❌ Database connection error</h3>
+                <pre><span class="comment"># Test koneksi database</span>
+<span class="command">mysql -u cuynotes_user -p cuynotes</span>
+
+<span class="comment"># Jika gagal, cek password di backend/.env</span>
+<span class="comment"># Pastikan DATABASE_URL sesuai: localhost bukan cuynotes_db</span>
+<span class="comment"># (cuynotes_db adalah nama container Docker, di aaPanel pakai localhost)</span></pre>
+
+                <h3>❌ Nginx 502 Bad Gateway</h3>
+                <pre><span class="comment"># Cek apakah backend dan frontend running</span>
+<span class="command">pm2 status</span>
+
+<span class="comment"># Jika salah satu offline, lihat log error</span>
+<span class="command">pm2 logs</span> cuynotes-backend --lines 50
+<span class="command">pm2 logs</span> cuynotes-frontend --lines 50
+
+<span class="comment"># Restart semua</span>
+<span class="command">pm2 restart all</span></pre>
+
+                <h3>❌ Permission denied</h3>
+                <pre><span class="comment"># Set ownership folder ke www user</span>
+<span class="command">chown -R www:www</span> /www/wwwroot/notes-app
+
+<span class="comment"># Atau jika pakai PM2 sebagai root</span>
+<span class="command">chmod -R 755</span> /www/wwwroot/notes-app</pre>
+
+                <h3>❌ Port sudah dipakai</h3>
+                <pre><span class="comment"># Cari proses yang pakai port</span>
+<span class="command">lsof -i :3000</span>
+<span class="command">lsof -i :5001</span>
+
+<span class="comment"># Kill jika perlu</span>
+<span class="command">kill -9</span> &lt;PID&gt;</pre>
+
+                <h3>🔄 Update aplikasi dari GitHub</h3>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app
+
+<span class="comment"># Pull update terbaru</span>
+<span class="command">git pull origin main</span>
+
+<span class="comment"># Update backend dependencies</span>
+<span class="command">cd</span> backend
+<span class="command">source</span> venv/bin/activate
+<span class="command">pip install -r</span> requirements.txt
+
+<span class="comment"># Update frontend</span>
+<span class="command">cd</span> ../client
+<span class="command">npm install</span>
+<span class="command">npm run build</span>
+
+<span class="comment"># Restart semua</span>
+<span class="command">pm2 restart all</span></pre>
+            </div>
+        </section>
+
+        <!-- Quick Reference -->
+        <section>
+            <div class="section-card" style="border-left: 4px solid #22c55e;">
+                <h2><span class="icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">📌</span> Quick
+                    Reference</h2>
+                <p>Ringkasan perintah dan lokasi penting:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Lokasi / Perintah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Project directory</strong></td>
+                            <td><code>/www/wwwroot/notes-app</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend .env</strong></td>
+                            <td><code>/www/wwwroot/notes-app/backend/.env</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frontend .env</strong></td>
+                            <td><code>/www/wwwroot/notes-app/client/.env</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nginx config</strong></td>
+                            <td><code>/www/server/panel/vhost/nginx/DOMAIN.conf</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PM2 config</strong></td>
+                            <td><code>/www/wwwroot/notes-app/ecosystem.config.js</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PM2 logs</strong></td>
+                            <td><code>pm2 logs</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nginx logs</strong></td>
+                            <td><code>/www/wwwlogs/cuynotes.log</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Start services</strong></td>
+                            <td><code>pm2 start ecosystem.config.js</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Restart all</strong></td>
+                            <td><code>pm2 restart all</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Akses MySQL</strong></td>
+                            <td><code>mysql -u cuynotes_user -p cuynotes</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>aaPanel</strong></td>
+                            <td><code>http://IP:7800</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+
+        <div class="footer">
+            <p>🖥️ <strong>CuyNotes aaPanel Deployment Guide</strong></p>
+            <p style="margin-top: 8px;">Next.js + Flask + MySQL + Nginx + PM2 | <a
+                    href="https://github.com/yuwancornelius/notes-app"
+                    style="color: #f97316; text-decoration: none;">GitHub Repository</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
