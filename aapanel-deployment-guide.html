@@ -562,7 +562,8 @@
                     <div class="icon-box">ℹ️</div>
                     <p>VPS bisa dari provider manapun: <strong>DigitalOcean</strong>, <strong>Vultr</strong>,
                         <strong>Linode</strong>, <strong>AWS Lightsail</strong>, <strong>IDCloudHost</strong>,
-                        <strong>Biznet Gio</strong>, dll. Pilih lokasi server terdekat untuk latency rendah.</p>
+                        <strong>Biznet Gio</strong>, dll. Pilih lokasi server terdekat untuk latency rendah.
+                    </p>
                 </div>
             </div>
         </section>
@@ -582,7 +583,8 @@
                 <div class="info-box warning">
                     <div class="icon-box">⚠️</div>
                     <p>Proses instalasi memakan waktu ±2-5 menit. Setelah selesai, akan muncul informasi penting,
-                        <strong>catat semua info ini</strong>:</p>
+                        <strong>catat semua info ini</strong>:
+                    </p>
                 </div>
 
                 <pre><span class="comment"># Output setelah instalasi selesai (contoh):</span>
@@ -602,7 +604,8 @@
                     <li>
                         <strong>Buka aaPanel di browser</strong>
                         <p>Akses URL yang diberikan setelah instalasi (misalnya:
-                            <code>http://103.xxx.xxx.xxx:7800/abcdefgh</code>)</p>
+                            <code>http://103.xxx.xxx.xxx:7800/abcdefgh</code>)
+                        </p>
                     </li>
                     <li>
                         <strong>Login dengan username & password</strong>
@@ -659,24 +662,25 @@
                 <div class="info-box info">
                     <div class="icon-box">⏱️</div>
                     <p>Proses instalasi LNMP memakan waktu ±5-15 menit. Tunggu sampai semua selesai (cek di
-                        <strong>Background Task</strong>).</p>
+                        <strong>Background Task</strong>).
+                    </p>
                 </div>
 
                 <h3>Install Tambahan via Terminal SSH</h3>
                 <p>Setelah LNMP selesai, buka terminal SSH (bisa dari aaPanel: klik <strong>"Terminal"</strong> di
                     sidebar) dan install software tambahan:</p>
 
-                <h4>🐍 Install Python 3.11 & pip</h4>
+                <h4>🐍 Install Python 3.12 & pip</h4>
                 <pre><span class="comment"># Ubuntu / Debian</span>
 <span class="command">sudo apt update</span>
-<span class="command">sudo apt install -y</span> python3.11 python3.11-venv python3-pip python3.11-dev
+<span class="command">sudo apt install -y</span> python3.12 python3.12-venv python3-pip python3.12-dev
 <span class="command">sudo apt install -y</span> gcc default-libmysqlclient-dev pkg-config
 
-<span class="comment"># Jika python3.11 tidak tersedia, tambahkan repository deadsnakes:</span>
+<span class="comment"># Jika python3.12 tidak tersedia, tambahkan repository deadsnakes:</span>
 <span class="command">sudo apt install -y</span> software-properties-common
 <span class="command">sudo add-apt-repository</span> ppa:deadsnakes/ppa -y
 <span class="command">sudo apt update</span>
-<span class="command">sudo apt install -y</span> python3.11 python3.11-venv python3.11-dev</pre>
+<span class="command">sudo apt install -y</span> python3.12 python3.12-venv python3.12-dev</pre>
 
                 <h4>📗 Install Node.js 20 (LTS)</h4>
                 <pre><span class="comment"># Install Node.js via NodeSource</span>
@@ -801,11 +805,11 @@
                     </li>
                     <li>
                         <strong>Buat Python virtual environment</strong>
-                        <pre><span class="command">python3.11 -m venv venv</span>
+                        <pre><span class="command">python3.12 -m venv venv</span>
 <span class="command">source</span> venv/bin/activate</pre>
                         <div class="info-box info">
                             <div class="icon-box">ℹ️</div>
-                            <p>Jika <code>python3.11</code> tidak ditemukan, coba <code>python3</code>. Pastikan versi
+                            <p>Jika <code>python3.12</code> tidak ditemukan, coba <code>python3</code>. Pastikan versi
                                 minimal Python 3.9+.</p>
                         </div>
                     </li>
@@ -832,7 +836,8 @@
                             <div class="icon-box">🚨</div>
                             <p><strong>PENTING:</strong> Ganti <code>PASSWORD_DB_KAMU</code> dengan password database
                                 yang sudah kamu buat di Step 4. Ganti juga <code>SECRET_KEY</code> dan
-                                <code>JWT_SECRET_KEY</code> dengan string random yang panjang.</p>
+                                <code>JWT_SECRET_KEY</code> dengan string random yang panjang.
+                            </p>
                         </div>
 
                         <div class="info-box tip">
@@ -1009,7 +1014,8 @@
                 <div class="info-box warning">
                     <div class="icon-box">⚠️</div>
                     <p>Ganti <code>DOMAIN_ATAU_IP_KAMU</code> dengan domain atau IP publik server kamu. Contoh:
-                        <code>notes.domain.com</code> atau <code>103.xxx.xxx.xxx</code>.</p>
+                        <code>notes.domain.com</code> atau <code>103.xxx.xxx.xxx</code>.
+                    </p>
                 </div>
 
                 <div class="info-box tip">
