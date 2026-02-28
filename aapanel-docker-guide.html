@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuyNotes - aaPanel + Docker Deployment Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.7;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+            padding: 60px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.1)
+            }
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .hero .subtitle {
+            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 400;
+            position: relative;
+        }
+
+        .hero .logo-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 32px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero .repo-link {
+            display: inline-block;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-top: -40px;
+            position: relative;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .toc h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .toc a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            color: #0284c7;
+            text-decoration: none;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+
+        .toc a:hover {
+            background: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .toc .step-num {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        section {
+            margin-top: 40px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+        }
+
+        section h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        section h2 .icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #334155;
+            margin: 24px 0 12px;
+        }
+
+        section h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #475569;
+            margin: 18px 0 10px;
+        }
+
+        section p {
+            color: #475569;
+            margin-bottom: 14px;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 14px 0 18px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #1e293b;
+        }
+
+        pre .comment {
+            color: #64748b;
+        }
+
+        pre .command {
+            color: #22d3ee;
+        }
+
+        pre .string {
+            color: #a5f3fc;
+        }
+
+        pre .keyword {
+            color: #f472b6;
+        }
+
+        pre .highlight {
+            color: #fbbf24;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.85em;
+            color: #dc2626;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box .icon-box {
+            font-size: 20px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .info-box.tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .info-box.tip p {
+            color: #166534;
+            margin: 0;
+        }
+
+        .info-box.warning {
+            background: #fefce8;
+            border: 1px solid #fde68a;
+        }
+
+        .info-box.warning p {
+            color: #854d0e;
+            margin: 0;
+        }
+
+        .info-box.danger {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .info-box.danger p {
+            color: #991b1b;
+            margin: 0;
+        }
+
+        .info-box.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+        }
+
+        .info-box.info p {
+            color: #1e40af;
+            margin: 0;
+        }
+
+        .step-list {
+            counter-reset: steps;
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-list li {
+            counter-increment: steps;
+            padding: 18px 0 18px 56px;
+            position: relative;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .step-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-list li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 0;
+            top: 18px;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .step-list li strong {
+            display: block;
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .step-list li p {
+            margin: 0 0 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        thead th {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge.blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge.amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .config-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px 24px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 14px 0 18px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.83rem;
+            line-height: 1.7;
+            border: 1px solid #334155;
+            white-space: pre;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+            margin: 32px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .toc ul {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hero">
+        <div class="container">
+            <div class="logo-icon">🐳</div>
+            <h1>aaPanel + Docker Deploy Guide</h1>
+            <p class="subtitle">Deploy CuyNotes menggunakan Docker di aaPanel — cara paling mudah dan cepat</p>
+            <br>
+            <a href="https://github.com/yuwancornelius/notes-app" target="_blank" class="repo-link">⭐
+                github.com/yuwancornelius/notes-app</a>
+        </div>
+    </div>
+
+    <div class="container">
+
+        <!-- Quick Start -->
+        <div class="toc" style="border-left: 4px solid #22c55e;">
+            <h2>🚀 Quick Start — 3 Langkah Saja!</h2>
+            <p style="color: #475569; margin-bottom: 16px;">Jika Docker sudah terinstall di aaPanel, cukup jalankan ini
+                di Terminal aaPanel:</p>
+            <pre style="margin: 0;"><span class="comment"># 1. Clone project</span>
+<span class="command">cd</span> /www/wwwroot && <span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git && <span class="command">cd</span> notes-app
+
+<span class="comment"># 2. Setup environment</span>
+<span class="command">cp</span> backend/.env.example backend/.env && <span class="command">cp</span> client/.env.example client/.env
+
+<span class="comment"># 3. Build & jalankan semua container</span>
+<span class="command">docker compose up --build -d</span>
+
+<span class="comment"># ✅ Buka browser → http://IP_SERVER:3000</span></pre>
+            <div class="info-box tip" style="margin-top: 16px; margin-bottom: 0;">
+                <div class="icon-box">💡</div>
+                <p>Untuk panduan lengkap via aaPanel Dashboard (GUI), ikuti langkah-langkah di bawah.</p>
+            </div>
+        </div>
+
+        <!-- TOC -->
+        <div class="toc" style="margin-top: 24px;">
+            <h2>📋 Daftar Isi</h2>
+            <ul>
+                <li><a href="#prerequisites"><span class="step-num">1</span> Prerequisites</a></li>
+                <li><a href="#install-docker"><span class="step-num">2</span> Install Docker di aaPanel</a></li>
+                <li><a href="#clone-project"><span class="step-num">3</span> Clone Project</a></li>
+                <li><a href="#setup-env"><span class="step-num">4</span> Konfigurasi Environment</a></li>
+                <li><a href="#deploy-compose"><span class="step-num">5</span> Deploy via Docker Compose</a></li>
+                <li><a href="#manage-containers"><span class="step-num">6</span> Kelola Container di aaPanel</a></li>
+                <li><a href="#setup-nginx"><span class="step-num">7</span> Konfigurasi Nginx Reverse Proxy</a></li>
+                <li><a href="#firewall"><span class="step-num">8</span> Konfigurasi Firewall</a></li>
+                <li><a href="#verify"><span class="step-num">9</span> Verifikasi & Testing</a></li>
+                <li><a href="#troubleshooting"><span class="step-num">10</span> Troubleshooting</a></li>
+            </ul>
+        </div>
+
+        <!-- Section 1 -->
+        <section id="prerequisites">
+            <div class="section-card">
+                <h2><span class="icon">📋</span> Prerequisites</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kebutuhan</th>
+                            <th>Detail</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>VPS / Server</strong></td>
+                            <td>Minimal 1 CPU, 2GB RAM, 20GB SSD — Ubuntu 20.04/22.04 atau CentOS 7/8</td>
+                        </tr>
+                        <tr>
+                            <td><strong>aaPanel</strong></td>
+                            <td>Sudah terinstall dan bisa diakses via browser</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Docker</strong></td>
+                            <td>Terinstall via aaPanel App Store (lihat Step 2)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IP Publik</strong></td>
+                            <td>IP publik server (contoh: <code>103.xxx.xxx.xxx</code>)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="install-docker">
+            <div class="section-card">
+                <h2><span class="icon">🐳</span> Install Docker di aaPanel</h2>
+                <p>Docker bisa diinstall langsung dari aaPanel App Store.</p>
+
+                <h3>Via aaPanel Dashboard</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka App Store</strong>
+                        <p>Di sidebar aaPanel, klik <strong>"Docker"</strong>. Jika Docker belum terinstall, akan muncul
+                            tombol Install. Atau buka <strong>"App Store"</strong> dan cari <strong>"Docker
+                                Manager"</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Klik Install</strong>
+                        <p>Klik tombol <strong>"Install"</strong>. Proses instalasi memakan waktu ±2-5 menit.</p>
+                    </li>
+                    <li>
+                        <strong>Verifikasi instalasi</strong>
+                        <p>Setelah selesai, klik <strong>"Docker"</strong> di sidebar. Kamu akan melihat dashboard
+                            Docker dengan tab: <strong>Overview</strong>, <strong>Container</strong>,
+                            <strong>Compose</strong>, <strong>Network</strong>, <strong>Volume</strong>, dll.</p>
+                    </li>
+                </ol>
+
+                <h3>Verifikasi via Terminal (opsional)</h3>
+                <pre><span class="comment"># Buka Terminal di aaPanel (sidebar → Terminal)</span>
+<span class="command">docker --version</span>
+<span class="comment"># Docker version 24.x.x atau lebih baru</span>
+
+<span class="command">docker compose version</span>
+<span class="comment"># Docker Compose version v2.x.x</span></pre>
+
+                <div class="info-box info">
+                    <div class="icon-box">ℹ️</div>
+                    <p>Jika Docker sudah muncul di sidebar aaPanel dengan ikon hijau, berarti Docker sudah terinstall
+                        dan running. Tidak perlu install ulang.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="clone-project">
+            <div class="section-card">
+                <h2><span class="icon">📥</span> Clone Project dari GitHub</h2>
+
+                <h3>Cara 1: Via Terminal aaPanel</h3>
+                <p>Di sidebar aaPanel, klik <strong>"Terminal"</strong>, lalu jalankan:</p>
+                <pre><span class="command">cd</span> /www/wwwroot
+<span class="command">git clone</span> https://github.com/yuwancornelius/notes-app.git
+<span class="command">cd</span> notes-app
+<span class="command">ls -la</span></pre>
+
+                <h3>Cara 2: Via aaPanel File Manager + Terminal</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka Files</strong>
+                        <p>Klik <strong>"Files"</strong> di sidebar aaPanel, navigasi ke <code>/www/wwwroot/</code>.</p>
+                    </li>
+                    <li>
+                        <strong>Buka Terminal</strong>
+                        <p>Klik <strong>"Terminal"</strong> di sidebar, lalu jalankan perintah <code>git clone</code> di
+                            atas.</p>
+                    </li>
+                    <li>
+                        <strong>Verifikasi di File Manager</strong>
+                        <p>Kembali ke <strong>"Files"</strong>, refresh halaman. Folder <code>notes-app</code> akan
+                            muncul di <code>/www/wwwroot/</code>.</p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="setup-env">
+            <div class="section-card">
+                <h2><span class="icon">🔐</span> Konfigurasi Environment</h2>
+                <p>Setup file <code>.env</code> untuk backend dan frontend sebelum build Docker.</p>
+
+                <h3>4.1 Backend Environment</h3>
+
+                <h4>Via aaPanel File Manager</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Navigasi ke folder backend</strong>
+                        <p>Klik <strong>"Files"</strong> → buka <code>/www/wwwroot/notes-app/backend/</code></p>
+                    </li>
+                    <li>
+                        <strong>Buat file .env</strong>
+                        <p>Klik <strong>"New File"</strong> → nama: <code>.env</code> → klik <strong>"Create"</strong>.
+                            Atau klik kanan <code>.env.example</code> → <strong>"Copy"</strong> →
+                            <strong>"Paste"</strong> → Rename ke <code>.env</code>.</p>
+                    </li>
+                    <li>
+                        <strong>Edit file .env</strong>
+                        <p>Klik kanan <code>.env</code> → <strong>"Edit"</strong>. Isi dengan:</p>
+                    </li>
+                </ol>
+                <pre><span class="keyword">FLASK_APP</span>=main.py
+<span class="keyword">FLASK_ENV</span>=<span class="string">production</span>
+<span class="keyword">SECRET_KEY</span>=<span class="string">GANTI_SECRET_KEY_RANDOM</span>
+<span class="keyword">JWT_SECRET_KEY</span>=<span class="string">GANTI_JWT_SECRET_RANDOM</span>
+<span class="keyword">DATABASE_URL</span>=<span class="string">mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes</span></pre>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Catatan:</strong> Untuk Docker, hostname database adalah <code>cuynotes_db</code> (nama
+                        service di docker-compose.yml), <strong>BUKAN</strong> <code>localhost</code>. Username/password
+                        harus sesuai dengan yang ada di <code>docker-compose.yml</code>.</p>
+                </div>
+
+                <h4>Via Terminal</h4>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app/backend
+<span class="command">cp</span> .env.example .env
+<span class="command">nano</span> .env</pre>
+
+                <div class="divider"></div>
+
+                <h3>4.2 Frontend Environment</h3>
+
+                <h4>Via aaPanel File Manager</h4>
+                <ol class="step-list">
+                    <li>
+                        <strong>Navigasi ke folder client</strong>
+                        <p>Klik <strong>"Files"</strong> → buka <code>/www/wwwroot/notes-app/client/</code></p>
+                    </li>
+                    <li>
+                        <strong>Buat dan edit file .env</strong>
+                        <p>Buat file <code>.env</code> dengan cara yang sama seperti backend. Isi dengan:</p>
+                    </li>
+                </ol>
+                <pre><span class="comment"># Ganti IP_SERVER dengan IP atau domain server kamu</span>
+<span class="keyword">NEXT_PUBLIC_API_URL</span>=<span class="string">http://IP_SERVER:5001/api</span>
+
+<span class="comment"># Contoh: http://103.218.242.1:5001/api</span>
+<span class="comment"># Jika pakai Nginx reverse proxy: http://103.218.242.1/api</span></pre>
+
+                <h4>Via Terminal</h4>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app/client
+<span class="command">cp</span> .env.example .env
+<span class="command">nano</span> .env</pre>
+
+                <div class="divider"></div>
+
+                <h3>4.3 Sesuaikan docker-compose.yml (opsional)</h3>
+                <p>Untuk production, ganti password default di <code>docker-compose.yml</code>:</p>
+
+                <pre><span class="comment"># Edit via File Manager (klik kanan → Edit) atau via terminal:</span>
+<span class="command">nano</span> /www/wwwroot/notes-app/docker-compose.yml</pre>
+
+                <p>Yang perlu diganti:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Default</th>
+                            <th>Ganti Dengan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>MYSQL_ROOT_PASSWORD</code></td>
+                            <td><code>root_password</code></td>
+                            <td>Password root yang kuat</td>
+                        </tr>
+                        <tr>
+                            <td><code>MYSQL_PASSWORD</code></td>
+                            <td><code>notes_password</code></td>
+                            <td>Password DB yang kuat</td>
+                        </tr>
+                        <tr>
+                            <td><code>SECRET_KEY</code></td>
+                            <td><code>your-secret-key</code></td>
+                            <td>String random 64 karakter</td>
+                        </tr>
+                        <tr>
+                            <td><code>JWT_SECRET_KEY</code></td>
+                            <td><code>your-jwt-secret</code></td>
+                            <td>String random 64 karakter</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>PENTING:</strong> Jika mengubah <code>MYSQL_PASSWORD</code>, pastikan juga mengubah
+                        password di <code>DATABASE_URL</code> pada <code>backend/.env</code> dan di
+                        <code>docker-compose.yml</code> bagian backend environment agar sesuai!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="deploy-compose">
+            <div class="section-card">
+                <h2><span class="icon">🚀</span> Deploy via Docker Compose</h2>
+                <p>Sekarang saatnya build dan jalankan semua container. Ada 2 cara:</p>
+
+                <h3>🖥️ Cara 1: Via aaPanel Docker Dashboard (Compose)</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka Docker Manager</strong>
+                        <p>Klik <strong>"Docker"</strong> di sidebar aaPanel.</p>
+                    </li>
+                    <li>
+                        <strong>Buka tab "Compose"</strong>
+                        <p>Klik tab <strong>"Compose"</strong> di bagian atas halaman Docker.</p>
+                    </li>
+                    <li>
+                        <strong>Tambah Compose Project</strong>
+                        <p>Klik tombol <strong>"Add"</strong> atau <strong>"Add Compose"</strong>. Isi form:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Name</strong></td>
+                                    <td><code>cuynotes</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Path / Directory</strong></td>
+                                    <td><code>/www/wwwroot/notes-app</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>aaPanel akan otomatis mendeteksi file <code>docker-compose.yml</code> di folder tersebut.</p>
+                    </li>
+                    <li>
+                        <strong>Klik Build / Up</strong>
+                        <p>Klik tombol <strong>"Up"</strong> atau <strong>"Build &amp; Up"</strong>. Ini akan:</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>🔨 Build image frontend (Next.js) dan backend (Flask)</li>
+                            <li>📥 Download image MySQL 8.0</li>
+                            <li>🚀 Start semua 3 container otomatis</li>
+                            <li>🌐 Membuat Docker network <code>cuynotes_network</code></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>Tunggu proses build</strong>
+                        <p>Proses build pertama kali memakan waktu <strong>3-8 menit</strong>. Kamu bisa melihat
+                            progress di log.</p>
+                    </li>
+                </ol>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips:</strong> Setelah Compose berhasil di-Up, kamu bisa lihat semua container di tab
+                        <strong>"Container"</strong>. Tiga container akan muncul: <code>frontend_nextjs</code>,
+                        <code>backend_flask</code>, <code>cuynotes_db</code>.</p>
+                </div>
+
+                <div class="divider"></div>
+
+                <h3>⌨️ Cara 2: Via Terminal aaPanel</h3>
+                <pre><span class="comment"># Masuk ke folder project</span>
+<span class="command">cd</span> /www/wwwroot/notes-app
+
+<span class="comment"># Build dan jalankan semua container (background mode)</span>
+<span class="command">docker compose up --build -d</span>
+
+<span class="comment"># Tunggu sampai selesai, lalu cek status</span>
+<span class="command">docker compose ps</span>
+
+<span class="comment"># Output yang diharapkan:</span>
+<span class="comment"># NAME               STATUS          PORTS</span>
+<span class="comment"># cuynotes_db        Up (healthy)    3306/tcp</span>
+<span class="comment"># backend_flask      Up              0.0.0.0:5001->5001/tcp</span>
+<span class="comment"># frontend_nextjs    Up              0.0.0.0:3000->3000/tcp</span></pre>
+            </div>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="manage-containers">
+            <div class="section-card">
+                <h2><span class="icon">📦</span> Kelola Container di aaPanel</h2>
+                <p>Setelah deploy, kamu bisa mengelola container langsung dari aaPanel Docker Dashboard.</p>
+
+                <h3>Via Tab "Container"</h3>
+                <p>Klik <strong>"Docker"</strong> → tab <strong>"Container"</strong>. Kamu akan melihat 3 container:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Container</th>
+                            <th>Image</th>
+                            <th>Port</th>
+                            <th>Fungsi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>frontend_nextjs</strong></td>
+                            <td>notes-app-frontend</td>
+                            <td><code>3000</code></td>
+                            <td>UI / halaman web</td>
+                        </tr>
+                        <tr>
+                            <td><strong>backend_flask</strong></td>
+                            <td>notes-app-backend</td>
+                            <td><code>5001</code></td>
+                            <td>REST API</td>
+                        </tr>
+                        <tr>
+                            <td><strong>cuynotes_db</strong></td>
+                            <td>mysql:8.0</td>
+                            <td><code>3306</code></td>
+                            <td>Database</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Aksi yang bisa dilakukan di Dashboard</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aksi</th>
+                            <th>Cara di aaPanel</th>
+                            <th>Perintah Terminal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Start</strong></td>
+                            <td>Klik ▶ <strong>Start</strong></td>
+                            <td><code>docker compose start</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stop</strong></td>
+                            <td>Klik ⏹ <strong>Stop</strong></td>
+                            <td><code>docker compose stop</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Restart</strong></td>
+                            <td>Klik 🔄 <strong>Restart</strong></td>
+                            <td><code>docker compose restart</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lihat Logs</strong></td>
+                            <td>Klik 📝 <strong>Logs</strong></td>
+                            <td><code>docker compose logs -f</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Terminal ke Container</strong></td>
+                            <td>Klik <strong>Terminal / Shell</strong></td>
+                            <td><code>docker exec -it nama_container bash</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hapus Container</strong></td>
+                            <td>Klik 🗑 <strong>Delete</strong></td>
+                            <td><code>docker compose down</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Via Tab "Compose"</h3>
+                <p>Di tab <strong>Compose</strong>, kamu bisa mengelola seluruh project sekaligus:</p>
+                <ul style="padding-left: 20px; color: #475569;">
+                    <li>🟢 <strong>Up</strong> — Start semua container dalam project</li>
+                    <li>🔴 <strong>Down</strong> — Stop dan hapus semua container</li>
+                    <li>🔄 <strong>Rebuild</strong> — Build ulang images dan restart</li>
+                    <li>📝 <strong>Edit</strong> — Edit docker-compose.yml langsung dari browser</li>
+                    <li>📊 <strong>Logs</strong> — Lihat log gabungan semua container</li>
+                </ul>
+
+                <div class="divider"></div>
+
+                <h3>Monitoring via Tab "Overview"</h3>
+                <p>Tab <strong>"Overview"</strong> di Docker Manager menampilkan:</p>
+                <ul style="padding-left: 20px; color: #475569;">
+                    <li>📊 Total container (running / stopped)</li>
+                    <li>💾 Penggunaan disk oleh Docker images</li>
+                    <li>🌐 Docker networks yang aktif</li>
+                    <li>📦 Docker volumes</li>
+                </ul>
+
+                <div class="divider"></div>
+
+                <h3>Akses MySQL via aaPanel</h3>
+                <pre><span class="comment"># Akses MySQL di dalam container</span>
+<span class="command">docker exec -it cuynotes_db</span> mysql -u notes_user -pnotes_password cuynotes
+
+<span class="comment"># Atau via aaPanel: Docker → Container → cuynotes_db → Terminal/Shell</span>
+<span class="comment"># Lalu ketik: mysql -u notes_user -pnotes_password cuynotes</span></pre>
+            </div>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="setup-nginx">
+            <div class="section-card">
+                <h2><span class="icon">🌐</span> Konfigurasi Nginx Reverse Proxy</h2>
+                <p>Agar aplikasi bisa diakses tanpa menyebutkan port (langsung via domain/IP), setup Nginx sebagai
+                    reverse proxy.</p>
+
+                <h3>Via aaPanel Dashboard</h3>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka Website → Add Site</strong>
+                        <p>Klik <strong>"Website"</strong> di sidebar → <strong>"Add site"</strong>.</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Domain</strong></td>
+                                    <td>Domain atau IP server kamu</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Root Directory</strong></td>
+                                    <td><code>/www/wwwroot/notes-app</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PHP Version</strong></td>
+                                    <td>Static</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <strong>Edit Nginx Config</strong>
+                        <p>Klik nama site → Tab <strong>"Config"</strong>. Hapus semua isi, ganti dengan:</p>
+                    </li>
+                </ol>
+
+                <div class="config-block">server {
+                    listen 80;
+                    server_name <span class="highlight">DOMAIN_ATAU_IP_KAMU</span>;
+
+                    access_log /www/wwwlogs/cuynotes.log;
+                    error_log /www/wwwlogs/cuynotes.error.log;
+
+                    # Frontend (port 3000)
+                    location / {
+                    proxy_pass http://127.0.0.1:3000;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_cache_bypass $http_upgrade;
+                    }
+
+                    # Backend API (port 5001)
+                    location /api/ {
+                    proxy_pass http://127.0.0.1:5001/api/;
+                    proxy_http_version 1.1;
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    }
+                    }</div>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p>Ganti <code>DOMAIN_ATAU_IP_KAMU</code> dengan IP/domain kamu. Jika pakai Nginx reverse proxy,
+                        update <code>client/.env</code> menjadi
+                        <code>NEXT_PUBLIC_API_URL=http://DOMAIN_ATAU_IP/api</code> (tanpa port), lalu rebuild:
+                        <code>docker compose up --build -d</code>.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8 -->
+        <section id="firewall">
+            <div class="section-card">
+                <h2><span class="icon">🔒</span> Konfigurasi Firewall</h2>
+
+                <h3>Via aaPanel Dashboard</h3>
+                <p>Klik <strong>"Security"</strong> di sidebar → Tab <strong>"Firewall"</strong>. Pastikan port berikut
+                    terbuka:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Fungsi</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>80</code></td>
+                            <td>HTTP (Nginx reverse proxy)</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>443</code></td>
+                            <td>HTTPS (jika pakai SSL)</td>
+                            <td><span class="badge amber">Opsional</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>7800</code></td>
+                            <td>aaPanel Dashboard</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>22</code></td>
+                            <td>SSH</td>
+                            <td><span class="badge green">Wajib</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>3000</code></td>
+                            <td>Frontend (jika tanpa Nginx)</td>
+                            <td><span class="badge amber">Opsional</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>5001</code></td>
+                            <td>Backend (jika tanpa Nginx)</td>
+                            <td><span class="badge amber">Opsional</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Best practice:</strong> Jika sudah pakai Nginx reverse proxy, <strong>jangan buka port
+                            3000 dan 5001</strong> ke publik. Ini lebih aman karena semua traffic melewati Nginx di port
+                        80/443.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9 -->
+        <section id="verify">
+            <div class="section-card">
+                <h2><span class="icon">✅</span> Verifikasi & Testing</h2>
+                <ol class="step-list">
+                    <li>
+                        <strong>Cek container status</strong>
+                        <p>Buka aaPanel → <strong>Docker</strong> → tab <strong>"Container"</strong>. Pastikan 3
+                            container berstatus <span class="badge green">Running</span>.</p>
+                        <pre><span class="comment"># Atau via terminal:</span>
+<span class="command">docker compose ps</span> -a</pre>
+                    </li>
+                    <li>
+                        <strong>Cek logs container</strong>
+                        <p>Klik <strong>Logs</strong> pada container <code>backend_flask</code> untuk pastikan tidak ada
+                            error. Atau:</p>
+                        <pre><span class="command">docker compose logs</span> backend_flask --tail 20
+<span class="command">docker compose logs</span> frontend_nextjs --tail 20</pre>
+                    </li>
+                    <li>
+                        <strong>Test API backend</strong>
+                        <pre><span class="command">curl</span> http://localhost:5001/api/notes</pre>
+                    </li>
+                    <li>
+                        <strong>Test frontend</strong>
+                        <pre><span class="command">curl</span> -I http://localhost:3000</pre>
+                    </li>
+                    <li>
+                        <strong>Test dari browser</strong>
+                        <p>Buka <code>http://IP_SERVER:3000</code> (atau <code>http://IP_SERVER</code> jika pakai
+                            Nginx). Checklist:</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>✅ Halaman login/register muncul</li>
+                            <li>✅ Register akun baru berhasil</li>
+                            <li>✅ Login berhasil</li>
+                            <li>✅ Buat note (public, private, protected)</li>
+                            <li>✅ Note protected diminta password</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Section 10 -->
+        <section id="troubleshooting">
+            <div class="section-card">
+                <h2><span class="icon">🛠️</span> Troubleshooting</h2>
+
+                <h3>❌ Container tidak mau start</h3>
+                <pre><span class="comment"># Lihat log error</span>
+<span class="command">docker compose logs</span> --tail 50
+
+<span class="comment"># Rebuild dari awal</span>
+<span class="command">docker compose down</span>
+<span class="command">docker compose up --build -d</span></pre>
+
+                <h3>❌ Database connection refused</h3>
+                <pre><span class="comment"># Pastikan hostname di backend/.env pakai cuynotes_db, BUKAN localhost</span>
+<span class="comment"># DATABASE_URL=mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes</span>
+
+<span class="comment"># Cek apakah DB container healthy</span>
+<span class="command">docker compose ps</span> cuynotes_db
+<span class="comment"># Status harus: Up (healthy)</span>
+
+<span class="comment"># Jika DB belum ready, wait dan restart backend</span>
+<span class="command">docker compose restart</span> backend_flask</pre>
+
+                <h3>❌ Frontend: API_URL tidak bekerja</h3>
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><code>NEXT_PUBLIC_*</code> di-embed saat build time. Setiap ubah <code>client/.env</code>, harus
+                        rebuild:</p>
+                </div>
+                <pre><span class="command">docker compose up --build -d</span> frontend_nextjs</pre>
+
+                <h3>❌ Port sudah dipakai</h3>
+                <pre><span class="comment"># Cek siapa pakai port</span>
+<span class="command">lsof -i :3000</span>
+<span class="command">lsof -i :5001</span>
+
+<span class="comment"># Kill proses atau ubah port di docker-compose.yml</span></pre>
+
+                <h3>❌ Nginx 502 Bad Gateway</h3>
+                <pre><span class="comment"># Pastikan container running</span>
+<span class="command">docker compose ps</span>
+
+<span class="comment"># Restart semua container</span>
+<span class="command">docker compose restart</span>
+
+<span class="comment"># Reload Nginx</span>
+<span class="command">nginx -s reload</span></pre>
+
+                <h3>🔄 Update dari GitHub</h3>
+                <pre><span class="command">cd</span> /www/wwwroot/notes-app
+<span class="command">git pull origin main</span>
+<span class="command">docker compose up --build -d</span></pre>
+
+                <h3>🗑️ Reset total (hapus semua data)</h3>
+                <pre><span class="comment"># HATI-HATI: Ini menghapus semua data termasuk database!</span>
+<span class="command">docker compose down -v</span>
+<span class="command">docker compose up --build -d</span></pre>
+            </div>
+        </section>
+
+        <!-- Quick Reference -->
+        <section>
+            <div class="section-card" style="border-left: 4px solid #22c55e;">
+                <h2><span class="icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">📌</span> Quick
+                    Reference</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Lokasi / Perintah</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Project</strong></td>
+                            <td><code>/www/wwwroot/notes-app</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>docker-compose.yml</strong></td>
+                            <td><code>/www/wwwroot/notes-app/docker-compose.yml</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Backend .env</strong></td>
+                            <td><code>/www/wwwroot/notes-app/backend/.env</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Frontend .env</strong></td>
+                            <td><code>/www/wwwroot/notes-app/client/.env</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Start</strong></td>
+                            <td><code>docker compose up -d</code> atau aaPanel Docker → Compose → Up</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stop</strong></td>
+                            <td><code>docker compose down</code> atau aaPanel Docker → Compose → Down</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rebuild</strong></td>
+                            <td><code>docker compose up --build -d</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Logs</strong></td>
+                            <td><code>docker compose logs -f</code> atau aaPanel Docker → Container → Logs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Akses MySQL</strong></td>
+                            <td><code>docker exec -it cuynotes_db mysql -u notes_user -pnotes_password cuynotes</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Update</strong></td>
+                            <td><code>git pull origin main && docker compose up --build -d</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="divider"></div>
+        <div class="footer">
+            <p>🐳 <strong>CuyNotes — aaPanel + Docker Deployment Guide</strong></p>
+            <p style="margin-top: 8px;">Next.js + Flask + MySQL + Docker Compose | <a
+                    href="https://github.com/yuwancornelius/notes-app"
+                    style="color: #0ea5e9; text-decoration: none;">GitHub Repository</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const t = document.querySelector(a.getAttribute('href'));
+                if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+    </script>
+</body>
+
+</html>
