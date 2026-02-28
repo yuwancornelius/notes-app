@@ -692,8 +692,35 @@
 <span class="command">npm --version</span>    <span class="comment"># 10.x.x</span></pre>
 
                 <h4>📦 Install PM2 (Process Manager)</h4>
+                <p>Ada 2 cara install PM2:</p>
+
+                <p><strong>Opsi A: Via Terminal</strong></p>
                 <pre><span class="comment"># Install PM2 secara global</span>
 <span class="command">sudo npm install -g pm2</span></pre>
+
+                <p><strong>Opsi B: Via aaPanel App Store (Recommended)</strong></p>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka App Store</strong>
+                        <p>Di sidebar aaPanel, klik <strong>"App Store"</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Cari "PM2 Manager"</strong>
+                        <p>Ketik <code>PM2</code> di kolom pencarian. Kamu akan menemukan <strong>"PM2 Manager"</strong>
+                            (versi 5.1 atau terbaru).</p>
+                    </li>
+                    <li>
+                        <strong>Klik Install</strong>
+                        <p>Klik tombol <strong>"Install"</strong> dan tunggu sampai selesai. PM2 Manager akan otomatis
+                            muncul di sidebar aaPanel setelah terinstall.</p>
+                    </li>
+                </ol>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Rekomendasi:</strong> Install PM2 Manager via App Store agar kamu bisa mengelola semua
+                        proses langsung dari dashboard aaPanel tanpa perlu buka terminal.</p>
+                </div>
 
                 <h4>🔀 Install Git</h4>
                 <pre><span class="command">sudo apt install -y git</span>
@@ -820,11 +847,40 @@
                     </li>
                     <li>
                         <strong>Setup file environment</strong>
+                        <p>Ada 2 cara untuk setup file <code>.env</code>:</p>
+
+                        <h4>Opsi A: Via Terminal (CLI)</h4>
                         <pre><span class="comment"># Copy template menjadi .env</span>
 <span class="command">cp</span> .env.example .env
 
 <span class="comment"># Edit file .env</span>
 <span class="command">nano</span> .env</pre>
+
+                        <h4>Opsi B: Via aaPanel File Manager</h4>
+                        <ol class="step-list">
+                            <li>
+                                <strong>Buka File Manager</strong>
+                                <p>Di sidebar aaPanel, klik <strong>"Files"</strong>.</p>
+                            </li>
+                            <li>
+                                <strong>Navigasi ke folder backend</strong>
+                                <p>Buka folder <code>/www/wwwroot/notes-app/backend/</code>.</p>
+                            </li>
+                            <li>
+                                <strong>Copy file .env.example</strong>
+                                <p>Klik kanan pada file <code>.env.example</code> → pilih <strong>"Copy"</strong>. Lalu
+                                    klik <strong>"Paste"</strong> di folder yang sama. Rename file hasil copy menjadi
+                                    <code>.env</code>.</p>
+                                <p><em>Atau:</em> Klik tombol <strong>"New File"</strong>, beri nama <code>.env</code>,
+                                    lalu klik <strong>"Create"</strong>.</p>
+                            </li>
+                            <li>
+                                <strong>Edit file .env</strong>
+                                <p>Klik kanan pada file <code>.env</code> → pilih <strong>"Edit"</strong> (atau
+                                    double-click). File editor akan terbuka di browser.</p>
+                            </li>
+                        </ol>
+
                         <p>Ubah isi file <code>.env</code> menjadi:</p>
                         <pre><span class="keyword">FLASK_APP</span>=main.py
 <span class="keyword">FLASK_ENV</span>=<span class="string">production</span>
@@ -890,11 +946,39 @@
                     </li>
                     <li>
                         <strong>Setup file environment</strong>
+                        <p>Ada 2 cara untuk setup file <code>.env</code>:</p>
+
+                        <h4>Opsi A: Via Terminal (CLI)</h4>
                         <pre><span class="comment"># Copy template menjadi .env</span>
 <span class="command">cp</span> .env.example .env
 
 <span class="comment"># Edit file .env</span>
 <span class="command">nano</span> .env</pre>
+
+                        <h4>Opsi B: Via aaPanel File Manager</h4>
+                        <ol class="step-list">
+                            <li>
+                                <strong>Buka File Manager</strong>
+                                <p>Di sidebar aaPanel, klik <strong>"Files"</strong>.</p>
+                            </li>
+                            <li>
+                                <strong>Navigasi ke folder client</strong>
+                                <p>Buka folder <code>/www/wwwroot/notes-app/client/</code>.</p>
+                            </li>
+                            <li>
+                                <strong>Copy file .env.example</strong>
+                                <p>Klik kanan pada file <code>.env.example</code> → <strong>"Copy"</strong> →
+                                    <strong>"Paste"</strong> di folder yang sama → Rename menjadi <code>.env</code>.</p>
+                                <p><em>Atau:</em> Klik <strong>"New File"</strong> → beri nama <code>.env</code> →
+                                    <strong>"Create"</strong>.</p>
+                            </li>
+                            <li>
+                                <strong>Edit file .env</strong>
+                                <p>Klik kanan pada <code>.env</code> → <strong>"Edit"</strong>. File editor akan terbuka
+                                    di browser.</p>
+                            </li>
+                        </ol>
+
                         <p>Ubah isi file <code>.env</code> menjadi:</p>
                         <pre><span class="comment"># Ganti dengan domain atau IP server kamu</span>
 <span class="keyword">NEXT_PUBLIC_API_URL</span>=<span class="string">http://IP_ATAU_DOMAIN_SERVER:5001/api</span>
@@ -1048,9 +1132,149 @@
             <div class="section-card">
                 <h2><span class="icon">🔄</span> Setup Auto-Start (PM2)</h2>
                 <p>Gunakan <strong>PM2</strong> untuk menjalankan backend dan frontend secara otomatis, dan restart
-                    otomatis jika crash atau server reboot.</p>
+                    otomatis jika crash atau server reboot. Ada 2 cara untuk setup PM2:</p>
 
-                <h3>Buat konfigurasi PM2</h3>
+                <!-- PM2 Manager Dashboard -->
+                <h3>💻 Cara 1: Via PM2 Manager di aaPanel Dashboard (Recommended)</h3>
+                <p>Jika kamu sudah install <strong>PM2 Manager</strong> dari App Store (lihat Step 3), kamu bisa
+                    mengelola semua proses langsung dari dashboard aaPanel.</p>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka PM2 Manager</strong>
+                        <p>Di sidebar aaPanel, klik <strong>"PM2 Manager"</strong>. Halaman PM2 Manager akan terbuka
+                            menampilkan list project.</p>
+                    </li>
+                    <li>
+                        <strong>Tambah Project Backend (Flask)</strong>
+                        <p>Klik tombol <strong>"Add Project"</strong> atau <strong>"Add Node Project"</strong>, lalu isi
+                            form:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Project Name</strong></td>
+                                    <td><code>cuynotes-backend</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Start File / Script</strong></td>
+                                    <td><code>/www/wwwroot/notes-app/backend/venv/bin/gunicorn</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Project Directory</strong></td>
+                                    <td><code>/www/wwwroot/notes-app/backend</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Run Command / Args</strong></td>
+                                    <td><code>--bind 127.0.0.1:5001 --workers 2 --timeout 120 main:app</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Interpreter</strong></td>
+                                    <td><code>none</code> (karena gunicorn sudah executable)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>Klik <strong>"Submit"</strong> atau <strong>"Add"</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Tambah Project Frontend (Next.js)</strong>
+                        <p>Klik <strong>"Add Project"</strong> lagi, lalu isi:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Project Name</strong></td>
+                                    <td><code>cuynotes-frontend</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Start File / Script</strong></td>
+                                    <td><code>/www/wwwroot/notes-app/client/node_modules/.bin/next</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Project Directory</strong></td>
+                                    <td><code>/www/wwwroot/notes-app/client</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Run Command / Args</strong></td>
+                                    <td><code>start -p 3000</code></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Interpreter</strong></td>
+                                    <td><code>none</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>Klik <strong>"Submit"</strong> atau <strong>"Add"</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Verifikasi status</strong>
+                        <p>Setelah ditambahkan, kedua project akan muncul di list PM2 Manager. Pastikan status keduanya
+                            menunjukkan <span class="badge green">online</span> / <span
+                                class="badge green">running</span>.</p>
+                    </li>
+                </ol>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Keuntungan PM2 Manager Dashboard:</strong></p>
+                </div>
+                <ul style="padding-left: 20px; color: #475569; margin-top: -8px;">
+                    <li>✅ <strong>Start / Stop / Restart</strong> — Klik tombol langsung di dashboard</li>
+                    <li>✅ <strong>View Logs</strong> — Lihat log real-time tanpa terminal</li>
+                    <li>✅ <strong>Monitoring</strong> — Pantau CPU & memory usage visual</li>
+                    <li>✅ <strong>Auto-restart</strong> — Otomatis restart jika crash</li>
+                    <li>✅ <strong>Startup on Boot</strong> — Otomatis jalan saat server reboot</li>
+                </ul>
+
+                <h4>Mengelola Project di PM2 Manager Dashboard</h4>
+                <p>Setelah project ditambahkan, kamu bisa melakukan aksi berikut langsung dari dashboard:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aksi</th>
+                            <th>Cara</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Start</strong></td>
+                            <td>Klik tombol <span class="badge green">▶ Start</span> di baris project</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stop</strong></td>
+                            <td>Klik tombol <span class="badge red">⏹ Stop</span> di baris project</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Restart</strong></td>
+                            <td>Klik tombol <span class="badge amber">🔄 Restart</span> di baris project</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lihat Log</strong></td>
+                            <td>Klik tombol <span class="badge blue">📝 Log</span> untuk melihat output log</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hapus Project</strong></td>
+                            <td>Klik tombol <span class="badge red">🗑 Delete</span> untuk menghapus dari PM2</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="divider"></div>
+
+                <!-- PM2 CLI -->
+                <h3>⌨️ Cara 2: Via Terminal (CLI)</h3>
+
+                <h4>Buat konfigurasi PM2</h4>
                 <pre><span class="comment"># Buat file konfigurasi PM2</span>
 <span class="command">nano</span> /www/wwwroot/notes-app/ecosystem.config.js</pre>
 
@@ -1079,7 +1303,7 @@
   ]
 };</pre>
 
-                <h3>Start semua service</h3>
+                <h4>Start semua service</h4>
                 <pre><span class="command">cd</span> /www/wwwroot/notes-app
 
 <span class="comment"># Start semua apps</span>
@@ -1096,7 +1320,7 @@
 <span class="comment"># │ cuynotes-frontend   │ 1  │ fork │ 0     │ online │</span>
 <span class="comment"># └─────────────────────┴────┴──────┴───────┴────────┘</span></pre>
 
-                <h3>Auto-start saat server reboot</h3>
+                <h4>Auto-start saat server reboot</h4>
                 <pre><span class="comment"># Simpan state PM2 saat ini</span>
 <span class="command">pm2 save</span>
 
@@ -1105,7 +1329,7 @@
 
 <span class="comment"># Ikuti instruksi yang muncul (copy-paste perintah yang ditampilkan)</span></pre>
 
-                <h3>Perintah PM2 yang Berguna</h3>
+                <h4>Perintah PM2 via Terminal</h4>
                 <table>
                     <thead>
                         <tr>
