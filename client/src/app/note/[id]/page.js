@@ -32,6 +32,7 @@ export default function NoteDetailPage() {
     const [fieldErrors, setFieldErrors] = useState({});
     const [showVisibilityConfirm, setShowVisibilityConfirm] = useState(false);
     const [pendingVisibility, setPendingVisibility] = useState(null);
+    const [showChangePassword, setShowChangePassword] = useState(false);
 
     useEffect(() => {
         if (!authLoading && noteId) fetchNote();
@@ -90,6 +91,7 @@ export default function NoteDetailPage() {
         setEditAccountPassword('');
         setEditError('');
         setFieldErrors({});
+        setShowChangePassword(false);
         setIsEditing(true);
     }
 
@@ -306,59 +308,89 @@ export default function NoteDetailPage() {
 
                                     {/* Password fields when visibility is protected */}
                                     {editVisibility === 'protected' && (
-                                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+                                        <div>
                                             {note.visibility === 'protected' ? (
                                                 <>
-                                                    <label className="block text-sm font-medium text-amber-800">
-                                                        🔐 Ganti Password Note
-                                                    </label>
-                                                    <p className="text-xs text-amber-600">Kosongkan semua field jika tidak ingin mengubah password</p>
-                                                    <div>
-                                                        <input
-                                                            type="password"
-                                                            value={editOldPassword}
-                                                            onChange={(e) => setEditOldPassword(e.target.value)}
-                                                            placeholder="Password lama note"
-                                                            className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.old_password ? 'border-red-400' : 'border-amber-200'}`}
-                                                        />
-                                                        {fieldErrors.old_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.old_password}</p>}
-                                                    </div>
-                                                    <div>
-                                                        <input
-                                                            type="password"
-                                                            value={editAccountPassword}
-                                                            onChange={(e) => setEditAccountPassword(e.target.value)}
-                                                            placeholder="Password akun kamu"
-                                                            className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.account_password ? 'border-red-400' : 'border-amber-200'}`}
-                                                        />
-                                                        {fieldErrors.account_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.account_password}</p>}
-                                                    </div>
-                                                    <hr className="border-amber-200" />
-                                                    <div>
-                                                        <input
-                                                            type="password"
-                                                            value={editPassword}
-                                                            onChange={(e) => setEditPassword(e.target.value)}
-                                                            placeholder="Password baru note"
-                                                            className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.new_password ? 'border-red-400' : 'border-amber-200'}`}
-                                                        />
-                                                        <p className={`text-xs mt-1 ${fieldErrors.new_password ? 'text-red-500' : 'text-amber-500'}`}>
-                                                            {fieldErrors.new_password ? `⚠️ ${fieldErrors.new_password}` : 'ℹ️ Password minimal 4 karakter'}
-                                                        </p>
-                                                    </div>
-                                                    <div>
-                                                        <input
-                                                            type="password"
-                                                            value={editConfirmPassword}
-                                                            onChange={(e) => setEditConfirmPassword(e.target.value)}
-                                                            placeholder="Konfirmasi password baru"
-                                                            className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.confirm_password ? 'border-red-400' : 'border-amber-200'}`}
-                                                        />
-                                                        {fieldErrors.confirm_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.confirm_password}</p>}
-                                                    </div>
+                                                    {!showChangePassword ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowChangePassword(true)}
+                                                            className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm font-medium text-amber-700 hover:bg-amber-100 transition w-full"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                                            </svg>
+                                                            Ganti Password Note
+                                                        </button>
+                                                    ) : (
+                                                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <label className="block text-sm font-medium text-amber-800">
+                                                                    🔐 Ganti Password Note
+                                                                </label>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setShowChangePassword(false);
+                                                                        setEditOldPassword('');
+                                                                        setEditAccountPassword('');
+                                                                        setEditPassword('');
+                                                                        setEditConfirmPassword('');
+                                                                        setFieldErrors({});
+                                                                    }}
+                                                                    className="text-xs text-amber-600 hover:text-amber-800 font-medium"
+                                                                >
+                                                                    ✕ Batal
+                                                                </button>
+                                                            </div>
+                                                            <div>
+                                                                <input
+                                                                    type="password"
+                                                                    value={editOldPassword}
+                                                                    onChange={(e) => setEditOldPassword(e.target.value)}
+                                                                    placeholder="Password lama note"
+                                                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.old_password ? 'border-red-400' : 'border-amber-200'}`}
+                                                                />
+                                                                {fieldErrors.old_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.old_password}</p>}
+                                                            </div>
+                                                            <div>
+                                                                <input
+                                                                    type="password"
+                                                                    value={editAccountPassword}
+                                                                    onChange={(e) => setEditAccountPassword(e.target.value)}
+                                                                    placeholder="Password akun kamu"
+                                                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.account_password ? 'border-red-400' : 'border-amber-200'}`}
+                                                                />
+                                                                {fieldErrors.account_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.account_password}</p>}
+                                                            </div>
+                                                            <hr className="border-amber-200" />
+                                                            <div>
+                                                                <input
+                                                                    type="password"
+                                                                    value={editPassword}
+                                                                    onChange={(e) => setEditPassword(e.target.value)}
+                                                                    placeholder="Password baru note"
+                                                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.new_password ? 'border-red-400' : 'border-amber-200'}`}
+                                                                />
+                                                                <p className={`text-xs mt-1 ${fieldErrors.new_password ? 'text-red-500' : 'text-amber-500'}`}>
+                                                                    {fieldErrors.new_password ? `⚠️ ${fieldErrors.new_password}` : 'ℹ️ Password minimal 4 karakter'}
+                                                                </p>
+                                                            </div>
+                                                            <div>
+                                                                <input
+                                                                    type="password"
+                                                                    value={editConfirmPassword}
+                                                                    onChange={(e) => setEditConfirmPassword(e.target.value)}
+                                                                    placeholder="Konfirmasi password baru"
+                                                                    className={`w-full px-4 py-3 bg-white border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent ${fieldErrors.confirm_password ? 'border-red-400' : 'border-amber-200'}`}
+                                                                />
+                                                                {fieldErrors.confirm_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.confirm_password}</p>}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </>
                                             ) : (
-                                                <>
+                                                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
                                                     <label className="block text-sm font-medium text-amber-800">
                                                         🔐 Set Password Note
                                                     </label>
@@ -384,7 +416,7 @@ export default function NoteDetailPage() {
                                                         />
                                                         {fieldErrors.confirm_password && <p className="text-xs text-red-500 mt-1">⚠️ {fieldErrors.confirm_password}</p>}
                                                     </div>
-                                                </>
+                                                </div>
                                             )}
                                         </div>
                                     )}
