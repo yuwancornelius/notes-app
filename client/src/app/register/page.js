@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/store/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import api from '@/services/api';
 
 export default function RegisterPage() {
     const { register } = useAuth();
@@ -12,8 +13,30 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [securityQuestion, setSecurityQuestion] = useState('');
+    const [securityAnswer, setSecurityAnswer] = useState('');
+    const [questions, setQuestions] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        async function fetchQuestions() {
+            try {
+                const data = await api.getSecurityQuestions();
+                setQuestions(data.questions);
+            } catch {
+                setQuestions([
+                    'Siapa nama ibu kandung Anda?',
+                    'Apa nama hewan peliharaan pertama Anda?',
+                    'Di kota mana Anda dilahirkan?',
+                    'Di kota mana Anda tinggal saat ini?',
+                    'Apa nama sekolah dasar Anda?',
+                    'Apa makanan favorit Anda?',
+                ]);
+            }
+        }
+        fetchQuestions();
+    }, []);
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -21,10 +44,18 @@ export default function RegisterPage() {
             setError('Passwords do not match');
             return;
         }
+        if (!securityQuestion) {
+            setError('Pilih pertanyaan keamanan');
+            return;
+        }
+        if (!securityAnswer.trim()) {
+            setError('Jawaban keamanan harus diisi');
+            return;
+        }
         setLoading(true);
         setError('');
         try {
-            await register(username, email, password);
+            await register(username, email, password, securityQuestion, securityAnswer);
             router.push('/');
         } catch (err) {
             setError(err.message);
@@ -91,7 +122,7 @@ export default function RegisterPage() {
                             />
                         </div>
 
-                        <div className="mb-6">
+                        <div className="mb-5">
                             <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
                             <input
                                 type="password"
@@ -101,6 +132,38 @@ export default function RegisterPage() {
                                 required
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                             />
+                        </div>
+
+                        {/* Security Question */}
+                        <div className="mb-5">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Pertanyaan Keamanan
+                                <span className="text-xs text-gray-400 font-normal ml-1">(untuk reset password)</span>
+                            </label>
+                            <select
+                                value={securityQuestion}
+                                onChange={(e) => setSecurityQuestion(e.target.value)}
+                                required
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent appearance-none"
+                            >
+                                <option value="">-- Pilih Pertanyaan --</option>
+                                {questions.map((q, idx) => (
+                                    <option key={idx} value={q}>{q}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Jawaban Keamanan</label>
+                            <input
+                                type="text"
+                                value={securityAnswer}
+                                onChange={(e) => setSecurityAnswer(e.target.value)}
+                                placeholder="Jawaban Anda"
+                                required
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                            />
+                            <p className="text-xs text-gray-400 mt-1">Jawaban tidak case-sensitive (huruf besar/kecil sama saja)</p>
                         </div>
 
                         <button

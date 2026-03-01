@@ -38,10 +38,16 @@ class ApiService {
     }
 
     // Auth
-    async register(username, email, password) {
+    async register(username, email, password, securityQuestion, securityAnswer) {
         return this.request('/auth/register', {
             method: 'POST',
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({
+                username,
+                email,
+                password,
+                security_question: securityQuestion,
+                security_answer: securityAnswer,
+            }),
         });
     }
 
@@ -60,6 +66,31 @@ class ApiService {
         return this.request('/auth/me', {
             method: 'PUT',
             body: JSON.stringify(data),
+        });
+    }
+
+    async getSecurityQuestions() {
+        return this.request('/auth/security-questions');
+    }
+
+    async forgotPassword(email) {
+        return this.request('/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    }
+
+    async verifySecurityAnswer(email, securityAnswer) {
+        return this.request('/auth/verify-security-answer', {
+            method: 'POST',
+            body: JSON.stringify({ email, security_answer: securityAnswer }),
+        });
+    }
+
+    async resetPassword(resetToken, newPassword) {
+        return this.request('/auth/reset-password', {
+            method: 'POST',
+            body: JSON.stringify({ reset_token: resetToken, new_password: newPassword }),
         });
     }
 

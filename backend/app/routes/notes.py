@@ -57,7 +57,7 @@ def get_notes(current_user_id):
     per_page = request.args.get('per_page', 20, type=int)
     search = request.args.get('search', '', type=str).strip()
 
-    query = Note.query.filter_by(visibility='public')
+    query = Note.query.filter(Note.visibility.in_(['public', 'protected']))
 
     if search:
         query = query.filter(Note.title.ilike(f'%{search}%'))
