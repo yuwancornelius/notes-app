@@ -30,15 +30,18 @@ def create_app():
     from app.models.user import User
     from app.models.note import Note
     from app.models.favorite import Favorite
+    from app.models.contributor import NoteContributor
 
     # Register blueprints
     from app.routes.auth import auth_bp
     from app.routes.notes import notes_bp
     from app.routes.favorites import favorites_bp
+    from app.routes.contributors import contributors_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(notes_bp, url_prefix='/api/notes')
     app.register_blueprint(favorites_bp, url_prefix='/api/favorites')
+    app.register_blueprint(contributors_bp, url_prefix='/api/notes')
 
     # Create tables
     with app.app_context():

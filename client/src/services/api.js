@@ -134,6 +134,24 @@ class ApiService {
         });
     }
 
+    // Contributors
+    async getContributors(noteId) {
+        return this.request(`/notes/${noteId}/contributors`);
+    }
+
+    async addContributor(noteId, email) {
+        return this.request(`/notes/${noteId}/contributors`, {
+            method: 'POST',
+            body: JSON.stringify({ email }),
+        });
+    }
+
+    async removeContributor(noteId, userId) {
+        return this.request(`/notes/${noteId}/contributors/${userId}`, {
+            method: 'DELETE',
+        });
+    }
+
     // Favorites
     async getFavorites(params = {}) {
         const query = new URLSearchParams(params).toString();

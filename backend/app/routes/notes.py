@@ -3,6 +3,7 @@ from app import db
 from app.models.note import Note
 from app.models.user import User
 from app.models.favorite import Favorite
+from app.models.contributor import NoteContributor
 from app.utils import token_required, optional_token
 
 notes_bp = Blueprint('notes', __name__)
@@ -170,8 +171,12 @@ def update_note(current_user_id, note_id):
         return jsonify({'error': 'Note not found'}), 404
 
     if note.user_id != current_user_id:
-        return jsonify({'error': 'Unauthorized'}), 403
+        # Check if user is a contributor
+        is_contributor = NoteContributor.query.filter_by(note_id=note_id, user_id=current_user_id).first() is not None
+        if not is_contributor:
+            return jsonify({'error': 'Unauthorized'}), 403
 
+    is_owner = note.user_id == current_user_id
     data = request.get_json()
 
     if 'title' in data:
@@ -180,6 +185,9 @@ def update_note(current_user_id, note_id):
         note.content = data['content'].strip()
 
     new_visibility = data.get('visibility', note.visibility)
+    # Contributors cannot change visibility
+    if not is_owner and new_visibility != note.visibility:
+        return jsonify({'error': 'Hanya pemilik yang bisa mengubah visibilitas'}), 403
     if new_visibility not in ['public', 'private', 'protected']:
         return jsonify({'error': 'Invalid visibility type'}), 400
 

@@ -33,6 +33,11 @@ export default function NoteDetailPage() {
     const [showVisibilityConfirm, setShowVisibilityConfirm] = useState(false);
     const [pendingVisibility, setPendingVisibility] = useState(null);
     const [showChangePassword, setShowChangePassword] = useState(false);
+    const [contributors, setContributors] = useState([]);
+    const [isContributor, setIsContributor] = useState(false);
+    const [contributorEmail, setContributorEmail] = useState('');
+    const [contributorError, setContributorError] = useState('');
+    const [contributorLoading, setContributorLoading] = useState(false);
 
     useEffect(() => {
         if (!authLoading && noteId) fetchNote();
@@ -49,10 +54,46 @@ export default function NoteDetailPage() {
             if (data.note.visibility === 'protected' && data.note.content === null) {
                 setShowPasswordModal(true);
             }
+
+            // Check contributor status
+            if (user) {
+                try {
+                    const contribData = await api.getContributors(noteId);
+                    setContributors(contribData.contributors);
+                    setIsContributor(contribData.contributors.some(c => c.user_id === user.id));
+                } catch {
+                    setContributors([]);
+                    setIsContributor(false);
+                }
+            }
         } catch (err) {
             console.error('Failed to load note:', err);
         }
         setLoading(false);
+    }
+
+    async function handleAddContributor(e) {
+        e.preventDefault();
+        if (!contributorEmail.trim()) return;
+        setContributorLoading(true);
+        setContributorError('');
+        try {
+            const data = await api.addContributor(noteId, contributorEmail.trim());
+            setContributors(prev => [...prev, data.contributor]);
+            setContributorEmail('');
+        } catch (err) {
+            setContributorError(err.message);
+        }
+        setContributorLoading(false);
+    }
+
+    async function handleRemoveContributor(userId) {
+        try {
+            await api.removeContributor(noteId, userId);
+            setContributors(prev => prev.filter(c => c.user_id !== userId));
+        } catch (err) {
+            console.error('Remove contributor error:', err);
+        }
     }
 
     async function handlePasswordVerify(password) {
@@ -181,6 +222,7 @@ export default function NoteDetailPage() {
     }
 
     const isOwner = user && note && user.id === note.user_id;
+    const canEdit = isOwner || isContributor;
 
     if (loading) {
         return (
@@ -235,18 +277,20 @@ export default function NoteDetailPage() {
                                 </button>
                             )}
 
-                            {isOwner && !isEditing && (
+                            {canEdit && !isEditing && (
                                 <>
-                                    <button onClick={startEditing} className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition">
+                                    <button onClick={startEditing} className="w-9 h-9 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition" title="Edit">
                                         <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                     </button>
-                                    <button onClick={() => setShowDeleteConfirm(true)} className="w-9 h-9 rounded-lg bg-white border border-red-200 flex items-center justify-center hover:bg-red-50 transition">
-                                        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                    {isOwner && (
+                                        <button onClick={() => setShowDeleteConfirm(true)} className="w-9 h-9 rounded-lg bg-white border border-red-200 flex items-center justify-center hover:bg-red-50 transition" title="Delete">
+                                            <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </>
                             )}
                         </div>
@@ -273,15 +317,19 @@ export default function NoteDetailPage() {
                                 />
                                 <div className="mt-4 space-y-4">
                                     <div className="flex gap-3 items-center">
-                                        <select
-                                            value={editVisibility}
-                                            onChange={(e) => handleVisibilityChange(e.target.value)}
-                                            className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                                        >
-                                            <option value="public">🌐 Public</option>
-                                            <option value="private">🔒 Private</option>
-                                            <option value="protected">🛡️ Protected</option>
-                                        </select>
+                                        {isOwner ? (
+                                            <select
+                                                value={editVisibility}
+                                                onChange={(e) => handleVisibilityChange(e.target.value)}
+                                                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                            >
+                                                <option value="public">🌐 Public</option>
+                                                <option value="private">🔒 Private</option>
+                                                <option value="protected">🛡️ Protected</option>
+                                            </select>
+                                        ) : (
+                                            <span className="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm">Contributor</span>
+                                        )}
                                         <div className="flex-1" />
                                         <button onClick={() => setIsEditing(false)} className="px-5 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm hover:bg-gray-50 transition">Cancel</button>
                                         <button onClick={handleSaveEdit} className="px-5 py-2 bg-blue-500 text-white rounded-xl text-sm hover:bg-blue-600 transition">Save</button>
@@ -469,6 +517,72 @@ export default function NoteDetailPage() {
                             </>
                         )}
                     </div>
+
+                    {/* Contributors Section — Owner only */}
+                    {isOwner && note.visibility !== 'private' && (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm mt-6">
+                            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Contributors
+                            </h3>
+
+                            {/* Add contributor form */}
+                            <form onSubmit={handleAddContributor} className="flex gap-2 mb-4">
+                                <input
+                                    type="email"
+                                    value={contributorEmail}
+                                    onChange={(e) => { setContributorEmail(e.target.value); setContributorError(''); }}
+                                    placeholder="Masukkan email akun"
+                                    className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={contributorLoading}
+                                    className="px-4 py-2.5 bg-blue-500 text-white text-sm font-medium rounded-xl hover:bg-blue-600 transition disabled:opacity-50"
+                                >
+                                    {contributorLoading ? '...' : 'Tambah'}
+                                </button>
+                            </form>
+
+                            {contributorError && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
+                                    {contributorError}
+                                </div>
+                            )}
+
+                            {/* Contributor list */}
+                            {contributors.length === 0 ? (
+                                <p className="text-sm text-gray-400 text-center py-3">Belum ada contributor</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {contributors.map((c) => (
+                                        <div key={c.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                                    <span className="text-sm font-bold text-blue-600">{c.user?.username?.charAt(0).toUpperCase()}</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-700">{c.user?.username}</p>
+                                                    <p className="text-xs text-gray-400">{c.user?.email}</p>
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleRemoveContributor(c.user_id)}
+                                                className="text-red-400 hover:text-red-600 transition"
+                                                title="Hapus contributor"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </main>
 
