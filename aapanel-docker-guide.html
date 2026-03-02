@@ -564,7 +564,8 @@
                         <strong>Verifikasi instalasi</strong>
                         <p>Setelah selesai, klik <strong>"Docker"</strong> di sidebar. Kamu akan melihat dashboard
                             Docker dengan tab: <strong>Overview</strong>, <strong>Container</strong>,
-                            <strong>Compose</strong>, <strong>Network</strong>, <strong>Volume</strong>, dll.</p>
+                            <strong>Compose</strong>, <strong>Network</strong>, <strong>Volume</strong>, dll.
+                        </p>
                     </li>
                 </ol>
 
@@ -634,7 +635,8 @@
                         <strong>Buat file .env</strong>
                         <p>Klik <strong>"New File"</strong> → nama: <code>.env</code> → klik <strong>"Create"</strong>.
                             Atau klik kanan <code>.env.example</code> → <strong>"Copy"</strong> →
-                            <strong>"Paste"</strong> → Rename ke <code>.env</code>.</p>
+                            <strong>"Paste"</strong> → Rename ke <code>.env</code>.
+                        </p>
                     </li>
                     <li>
                         <strong>Edit file .env</strong>
@@ -730,7 +732,8 @@
                     <div class="icon-box">🚨</div>
                     <p><strong>PENTING:</strong> Jika mengubah <code>MYSQL_PASSWORD</code>, pastikan juga mengubah
                         password di <code>DATABASE_URL</code> pada <code>backend/.env</code> dan di
-                        <code>docker-compose.yml</code> bagian backend environment agar sesuai!</p>
+                        <code>docker-compose.yml</code> bagian backend environment agar sesuai!
+                    </p>
                 </div>
             </div>
         </section>
@@ -742,7 +745,23 @@
                 <p>Sekarang saatnya build dan jalankan semua container. Ada 2 cara:</p>
 
                 <h3>🖥️ Cara 1: Via aaPanel Docker Dashboard (Compose)</h3>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Catatan:</strong> Karena CuyNotes menggunakan <code>build: context</code> (build dari
+                        Dockerfile lokal),
+                        kamu harus <strong>clone project terlebih dahulu</strong> via Terminal (Step 3) sebelum
+                        menggunakan cara ini.
+                        Compose Content di aaPanel harus mereferensikan path folder project yang sudah ada di server.
+                    </p>
+                </div>
+
                 <ol class="step-list">
+                    <li>
+                        <strong>Pastikan project sudah di-clone</strong>
+                        <p>Pastikan folder <code>/www/wwwroot/notes-app</code> sudah ada di server (lihat Step 3: Clone
+                            Project).</p>
+                    </li>
                     <li>
                         <strong>Buka Docker Manager</strong>
                         <p>Klik <strong>"Docker"</strong> di sidebar aaPanel.</p>
@@ -752,8 +771,11 @@
                         <p>Klik tab <strong>"Compose"</strong> di bagian atas halaman Docker.</p>
                     </li>
                     <li>
-                        <strong>Tambah Compose Project</strong>
-                        <p>Klik tombol <strong>"Add"</strong> atau <strong>"Add Compose"</strong>. Isi form:</p>
+                        <strong>Klik "Add Compose"</strong>
+                        <p>Klik tombol <strong>"Add Compose"</strong>. Akan muncul dialog dengan tab <strong>"General
+                                Creation"</strong>. Isi form berikut:</p>
+
+                        <h4>📝 Compose Name</h4>
                         <table>
                             <thead>
                                 <tr>
@@ -763,22 +785,107 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><strong>Name</strong></td>
+                                    <td><strong>Compose Name</strong></td>
                                     <td><code>cuynotes</code></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>Path / Directory</strong></td>
-                                    <td><code>/www/wwwroot/notes-app</code></td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p>aaPanel akan otomatis mendeteksi file <code>docker-compose.yml</code> di folder tersebut.</p>
+
+                        <h4>📄 Compose Content</h4>
+                        <p>Copy-paste seluruh isi <code>docker-compose.yml</code> ke editor <strong>"Compose
+                                Content"</strong>:</p>
+                        <pre><span class="keyword">version</span>: <span class="string">'3.8'</span>
+
+<span class="keyword">services</span>:
+  <span class="highlight">cuynotes_db</span>:
+    image: mysql:8.0
+    container_name: cuynotes_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: <span class="string">root_password</span>
+      MYSQL_DATABASE: <span class="string">cuynotes</span>
+      MYSQL_USER: <span class="string">notes_user</span>
+      MYSQL_PASSWORD: <span class="string">notes_password</span>
+    ports:
+      - <span class="string">"3306:3306"</span>
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: [<span class="string">"CMD"</span>, <span class="string">"mysqladmin"</span>, <span class="string">"ping"</span>, <span class="string">"-h"</span>, <span class="string">"localhost"</span>]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cuynotes_network
+
+  <span class="highlight">backend_flask</span>:
+    build:
+      context: <span class="string">/www/wwwroot/notes-app/backend</span>
+      dockerfile: Dockerfile
+    container_name: backend_flask
+    restart: always
+    ports:
+      - <span class="string">"5001:5001"</span>
+    environment:
+      FLASK_APP: main.py
+      FLASK_ENV: production
+      SECRET_KEY: <span class="string">GANTI_SECRET_KEY_RANDOM</span>
+      JWT_SECRET_KEY: <span class="string">GANTI_JWT_SECRET_RANDOM</span>
+      DATABASE_URL: <span class="string">mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes</span>
+    depends_on:
+      cuynotes_db:
+        condition: service_healthy
+    networks:
+      - cuynotes_network
+
+  <span class="highlight">frontend_nextjs</span>:
+    build:
+      context: <span class="string">/www/wwwroot/notes-app/client</span>
+      dockerfile: Dockerfile
+    container_name: frontend_nextjs
+    restart: always
+    ports:
+      - <span class="string">"3000:3000"</span>
+    environment:
+      NEXT_PUBLIC_API_URL: <span class="string">http://IP_SERVER:5001/api</span>
+    depends_on:
+      - backend_flask
+    networks:
+      - cuynotes_network
+
+<span class="keyword">volumes</span>:
+  mysql_data:
+
+<span class="keyword">networks</span>:
+  cuynotes_network:
+    driver: bridge</pre>
+
+                        <div class="info-box danger">
+                            <div class="icon-box">🚨</div>
+                            <p><strong>PENTING — Ganti nilai berikut sebelum Confirm:</strong></p>
+                            <ul style="margin: 8px 0 0 16px; list-style: disc;">
+                                <li><code>GANTI_SECRET_KEY_RANDOM</code> → string random 64 karakter</li>
+                                <li><code>GANTI_JWT_SECRET_RANDOM</code> → string random 64 karakter</li>
+                                <li><code>IP_SERVER</code> pada <code>NEXT_PUBLIC_API_URL</code> → IP publik server kamu
+                                    (contoh: <code>43.218.242.1</code>)</li>
+                                <li><code>root_password</code> dan <code>notes_password</code> → password yang kuat
+                                    untuk production</li>
+                            </ul>
+                        </div>
+
+                        <h4>🔐 .env Content</h4>
+                        <p>Bagian <strong>".env Content"</strong> bisa dikosongkan karena environment variables sudah
+                            didefinisikan langsung di Compose Content di atas.</p>
+
+                        <h4>📝 Notes (opsional)</h4>
+                        <p>Isi dengan catatan, misalnya: <code>CuyNotes App - Notes Application</code></p>
                     </li>
                     <li>
-                        <strong>Klik Build / Up</strong>
-                        <p>Klik tombol <strong>"Up"</strong> atau <strong>"Build &amp; Up"</strong>. Ini akan:</p>
+                        <strong>Klik "Confirm"</strong>
+                        <p>Klik tombol <strong>"Confirm"</strong>. aaPanel akan mulai build dan menjalankan semua
+                            container. Ini akan:</p>
                         <ul style="padding-left: 20px; color: #475569;">
-                            <li>🔨 Build image frontend (Next.js) dan backend (Flask)</li>
+                            <li>🔨 Build image frontend (Next.js) dan backend (Flask) dari Dockerfile</li>
                             <li>📥 Download image MySQL 8.0</li>
                             <li>🚀 Start semua 3 container otomatis</li>
                             <li>🌐 Membuat Docker network <code>cuynotes_network</code></li>
@@ -787,15 +894,19 @@
                     <li>
                         <strong>Tunggu proses build</strong>
                         <p>Proses build pertama kali memakan waktu <strong>3-8 menit</strong>. Kamu bisa melihat
-                            progress di log.</p>
+                            progress di log. Setelah selesai, status compose akan berubah menjadi <strong>"Up"</strong>.
+                        </p>
                     </li>
                 </ol>
 
                 <div class="info-box tip">
                     <div class="icon-box">💡</div>
-                    <p><strong>Tips:</strong> Setelah Compose berhasil di-Up, kamu bisa lihat semua container di tab
-                        <strong>"Container"</strong>. Tiga container akan muncul: <code>frontend_nextjs</code>,
-                        <code>backend_flask</code>, <code>cuynotes_db</code>.</p>
+                    <p><strong>Tips:</strong> Setelah Compose berhasil, klik tab <strong>"Container"</strong> untuk
+                        melihat semua container.
+                        Tiga container akan muncul: <code>frontend_nextjs</code>,
+                        <code>backend_flask</code>, <code>cuynotes_db</code>. Pastikan ketiganya berstatus
+                        <strong>"Running"</strong>.
+                    </p>
                 </div>
 
                 <div class="divider"></div>
@@ -1010,7 +1121,8 @@
                     <p>Ganti <code>DOMAIN_ATAU_IP_KAMU</code> dengan IP/domain kamu. Jika pakai Nginx reverse proxy,
                         update <code>client/.env</code> menjadi
                         <code>NEXT_PUBLIC_API_URL=http://DOMAIN_ATAU_IP/api</code> (tanpa port), lalu rebuild:
-                        <code>docker compose up --build -d</code>.</p>
+                        <code>docker compose up --build -d</code>.
+                    </p>
                 </div>
             </div>
         </section>
