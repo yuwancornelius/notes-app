@@ -794,9 +794,7 @@
                         <h4>📄 Compose Content</h4>
                         <p>Copy-paste seluruh isi <code>docker-compose.yml</code> ke editor <strong>"Compose
                                 Content"</strong>:</p>
-                        <pre><span class="keyword">version</span>: <span class="string">'3.8'</span>
-
-<span class="keyword">services</span>:
+                        <pre><span class="keyword">services</span>:
   <span class="highlight">cuynotes_db</span>:
     image: mysql:8.0
     container_name: cuynotes_db
@@ -815,8 +813,6 @@
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - cuynotes_network
 
   <span class="highlight">backend_flask</span>:
     build:
@@ -835,8 +831,6 @@
     depends_on:
       cuynotes_db:
         condition: service_healthy
-    networks:
-      - cuynotes_network
 
   <span class="highlight">frontend_nextjs</span>:
     build:
@@ -850,15 +844,9 @@
       NEXT_PUBLIC_API_URL: <span class="string">http://IP_SERVER:5001/api</span>
     depends_on:
       - backend_flask
-    networks:
-      - cuynotes_network
 
 <span class="keyword">volumes</span>:
-  mysql_data:
-
-<span class="keyword">networks</span>:
-  cuynotes_network:
-    driver: bridge</pre>
+  mysql_data:</pre>
 
                         <div class="info-box danger">
                             <div class="icon-box">🚨</div>
@@ -888,7 +876,6 @@
                             <li>🔨 Build image frontend (Next.js) dan backend (Flask) dari Dockerfile</li>
                             <li>📥 Download image MySQL 8.0</li>
                             <li>🚀 Start semua 3 container otomatis</li>
-                            <li>🌐 Membuat Docker network <code>cuynotes_network</code></li>
                         </ul>
                     </li>
                     <li>
