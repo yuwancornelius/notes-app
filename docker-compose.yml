@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   cuynotes_db:
     image: mysql:8.0
@@ -19,8 +17,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - cuynotes_network
 
   backend_flask:
     build:
@@ -39,8 +35,6 @@ services:
     depends_on:
       cuynotes_db:
         condition: service_healthy
-    networks:
-      - cuynotes_network
 
   frontend_nextjs:
     build:
@@ -54,13 +48,8 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:5001/api
     depends_on:
       - backend_flask
-    networks:
-      - cuynotes_network
 
 volumes:
   mysql_data:
 
 
-networks:
-  cuynotes_network:
-    driver: bridge
