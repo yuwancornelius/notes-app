@@ -20,7 +20,7 @@ services:
 
   backend_flask:
     build:
-      context: ./backend
+      context: /www/wwwroot/notes-app/backend
       dockerfile: Dockerfile
     container_name: backend_flask
     restart: always
@@ -37,7 +37,7 @@ services:
 
   frontend_nextjs:
     build:
-      context: ./client
+      context: /www/wwwroot/notes-app/client
       dockerfile: Dockerfile
     container_name: frontend_nextjs
     restart: always
