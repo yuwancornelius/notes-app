@@ -1370,23 +1370,142 @@ NEXT_PUBLIC_API_URL: http://<span class="highlight">43.218.242.155</span>/api</p
                 <div class="info-box tip">
                     <div class="icon-box">💡</div>
                     <p><strong>Tips keamanan:</strong> Setelah Nginx aktif dan semua berjalan, kamu bisa <strong>menutup
-                            port
-                            3000 dan 5001</strong>
+                            port 3000 dan 5001</strong>
                         di firewall (Lightsail/aaPanel Security). Semua traffic sekarang lewat port <strong>80</strong>
-                        via
-                        Nginx.
-                        Ini lebih aman karena mengurangi surface attack.</p>
+                        (atau <strong>443</strong> jika pakai SSL) via Nginx.</p>
                 </div>
 
+                <div class="divider"></div>
+
+                <!-- Step 7.5 -->
+                <h3>🔒 7.5 — Setup HTTPS/SSL (Let's Encrypt)</h3>
+                <p>Agar website bisa diakses via <strong>HTTPS</strong> dengan gembok hijau 🔒, kita perlu memasang SSL
+                    certificate gratis dari Let's Encrypt.</p>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Dapatkan SSL Certificate di aaPanel</strong>
+                        <p>Di aaPanel → <strong>Website</strong> → klik <code>notes.yuwan.my.id</code> → tab
+                            <strong>"SSL"</strong>
+                            → tab <strong>"Let's Encrypt"</strong>.
+                        </p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Setting</th>
+                                    <th>Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Application Method</strong></td>
+                                    <td><strong>File Verification</strong> (default)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Domain name</strong></td>
+                                    <td>Centang <code>notes.yuwan.my.id</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>Klik <strong>"Apply"</strong>. Tunggu sampai status menunjukkan certificate berhasil didapat.
+                        </p>
+
+                        <div class="info-box warning">
+                            <div class="icon-box">⚠️</div>
+                            <p><strong>Jika Apply gagal</strong> dengan error "A record resolution of the domain points
+                                to this server IP":<br>
+                                Pastikan Nginx config sudah ada block <code>location /.well-known/</code> agar Let's
+                                Encrypt bisa verifikasi.
+                                Lihat contoh config di Step 7.2.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Pasang SSL di Nginx Config (via Terminal)</strong>
+                        <p>aaPanel "Force HTTPS" sering tidak bisa karena kita pakai custom Nginx config.
+                            Solusinya: <strong>pasang SSL manual via Terminal aaPanel</strong>.</p>
+                        <p>Buka Terminal aaPanel (sidebar → <strong>Terminal</strong>), lalu jalankan:</p>
+                        <pre><span class="command">cat</span> > /www/server/panel/vhost/nginx/notes.yuwan.my.id.conf << 'ENDCONF'
+server {
+    listen 80;
+    server_name <span class="highlight">notes.yuwan.my.id</span>;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name <span class="highlight">notes.yuwan.my.id</span>;
+
+    ssl_certificate /www/server/panel/vhost/cert/<span class="highlight">notes.yuwan.my.id</span>/fullchain.pem;
+    ssl_certificate_key /www/server/panel/vhost/cert/<span class="highlight">notes.yuwan.my.id</span>/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    access_log /www/wwwlogs/cuynotes.log;
+    error_log /www/wwwlogs/cuynotes.error.log;
+
+    location /.well-known/ {
+        root /www/wwwroot/notes-app;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:5001/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+ENDCONF</pre>
+
+                        <div class="info-box danger">
+                            <div class="icon-box">🚨</div>
+                            <p>Ganti semua <code>notes.yuwan.my.id</code> dengan domain kamu!</p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Test dan Reload Nginx</strong>
+                        <pre><span class="command">sudo nginx -t</span> && <span class="command">sudo systemctl reload nginx</span></pre>
+                        <p>Jika <code>nginx -t</code> menunjukkan <strong>"syntax is ok"</strong>, maka config sudah
+                            benar.</p>
+                    </li>
+                    <li>
+                        <strong>Update NEXT_PUBLIC_API_URL ke HTTPS</strong>
+                        <p>Di aaPanel → Docker → Compose → cuynotes → Configuration File, ganti:</p>
+                        <pre>NEXT_PUBLIC_API_URL: http://notes.yuwan.my.id/api</pre>
+                        <p>Menjadi:</p>
+                        <pre>NEXT_PUBLIC_API_URL: <span class="highlight">https</span>://notes.yuwan.my.id/api</pre>
+                        <p>Save, lalu rebuild frontend:</p>
+                        <pre><span class="command">cd</span> /www/wwwroot/notes-app
+<span class="command">sudo docker compose -f docker-compose.prod.yml build --no-cache</span> frontend_nextjs
+<span class="command">sudo docker compose -f docker-compose.prod.yml up -d</span> --force-recreate</pre>
+                    </li>
+                    <li>
+                        <strong>Verifikasi HTTPS</strong>
+                        <pre><span class="command">curl -I</span> https://notes.yuwan.my.id</pre>
+                        <p>Buka <code>https://notes.yuwan.my.id</code> di browser — seharusnya sudah ada gembok hijau 🔒
+                        </p>
+                    </li>
+                </ol>
+
                 <div class="info-box info">
-                    <div class="icon-box">🔒</div>
-                    <p><strong>HTTPS/SSL (opsional):</strong> Untuk mengaktifkan HTTPS, di aaPanel klik site kamu → tab
-                        <strong>"SSL"</strong>
-                        → pilih <strong>"Let's Encrypt"</strong> → klik <strong>"Apply"</strong>. SSL gratis akan
-                        otomatis
-                        terpasang
-                        dan traffic akan di-redirect ke HTTPS.
-                    </p>
+                    <div class="icon-box">ℹ️</div>
+                    <p><strong>Hasil akhir:</strong><br>
+                        ✅ <code>http://notes.yuwan.my.id</code> → otomatis redirect ke HTTPS<br>
+                        ✅ <code>https://notes.yuwan.my.id</code> → gembok hijau, aman!<br>
+                        ✅ <code>https://notes.yuwan.my.id/api/health</code> → Backend API via HTTPS</p>
                 </div>
             </div>
         </section>
@@ -1601,6 +1720,36 @@ NEXT_PUBLIC_API_URL: http://<span class="highlight">43.218.242.155</span>/api</p
                     domain
                     <code>notes.domainmu.com</code>, lalu edit Nginx config-nya dengan reverse proxy (lihat Step 7.2).
                 </p>
+
+                <h3>❌ SSL: "Deployment Failed" saat Apply Let's Encrypt</h3>
+                <p><strong>Penyebab:</strong> Let's Encrypt tidak bisa verifikasi domain karena Nginx reverse proxy
+                    memblokir akses ke <code>/.well-known/</code>.</p>
+                <p><strong>Solusi:</strong> Tambahkan block berikut di Nginx config <strong>sebelum</strong>
+                    <code>location /</code>:</p>
+                <pre>location /.well-known/ {
+    root /www/wwwroot/notes-app;
+}</pre>
+                <p>Save Nginx config, lalu coba Apply lagi.</p>
+
+                <h3>❌ SSL: "unknown directive ssl" saat Save Config</h3>
+                <p><strong>Penyebab:</strong> aaPanel Config editor menambahkan wrapper yang bentrok dengan config
+                    custom kita.</p>
+                <p><strong>Solusi:</strong> Jangan edit SSL config via Config tab aaPanel. Gunakan
+                    <strong>Terminal</strong> (sidebar → Terminal)
+                    untuk menulis config langsung ke file. Lihat Step 7.5 untuk command lengkapnya.</p>
+
+                <h3>❌ SSL: Certificate valid tapi browser masih "Not Secure"</h3>
+                <p><strong>Penyebab:</strong> Browser mengakses via HTTP bukan HTTPS, dan Force HTTPS aaPanel tidak bisa
+                    karena custom config.</p>
+                <p><strong>Solusi:</strong></p>
+                <ol style="padding-left: 20px; color: #475569;">
+                    <li>Pastikan port <strong>443</strong> terbuka di ketiga layer firewall (Lightsail, aaPanel, ufw)
+                    </li>
+                    <li>Pasang SSL di Nginx config via Terminal (lihat Step 7.5) — ini sudah include redirect HTTP →
+                        HTTPS</li>
+                    <li>Update <code>NEXT_PUBLIC_API_URL</code> ke <code>https://</code> dan rebuild frontend</li>
+                </ol>
+
 
                 <h3>🔄 Update dari GitHub</h3>
                 <pre><span class="command">cd</span> /www/wwwroot/notes-app
