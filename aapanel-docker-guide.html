@@ -502,7 +502,8 @@
                 <li><a href="#setup-env"><span class="step-num">4</span> Konfigurasi Environment</a></li>
                 <li><a href="#deploy-compose"><span class="step-num">5</span> Deploy via Docker Compose</a></li>
                 <li><a href="#manage-containers"><span class="step-num">6</span> Kelola Container di aaPanel</a></li>
-                <li><a href="#setup-nginx"><span class="step-num">7</span> Konfigurasi Nginx Reverse Proxy</a></li>
+                <li><a href="#setup-nginx"><span class="step-num">7</span> Konfigurasi Domain + Nginx Reverse Proxy</a>
+                </li>
                 <li><a href="#firewall"><span class="step-num">8</span> Konfigurasi Firewall</a></li>
                 <li><a href="#verify"><span class="step-num">9</span> Verifikasi & Testing</a></li>
                 <li><a href="#troubleshooting"><span class="step-num">10</span> Troubleshooting</a></li>
@@ -1034,20 +1035,151 @@
         <!-- Section 7 -->
         <section id="setup-nginx">
             <div class="section-card">
-                <h2><span class="icon">🌐</span> Konfigurasi Nginx Reverse Proxy</h2>
-                <p>Agar aplikasi bisa diakses <strong>tanpa port</strong> (langsung via IP atau domain), setup Nginx
-                    sebagai
-                    reverse proxy. Ini akan meneruskan request dari port 80 ke port 3000 (frontend) dan /api ke port
-                    5001 (backend).</p>
+                <h2><span class="icon">🌐</span> Konfigurasi Domain + Nginx Reverse Proxy</h2>
+                <p>Agar aplikasi bisa diakses <strong>tanpa port</strong> dan menggunakan <strong>domain
+                        sendiri</strong>,
+                    kita perlu setup 2 hal: <strong>DNS Record</strong> dan <strong>Nginx Reverse Proxy</strong>.</p>
 
                 <div class="info-box info">
                     <div class="icon-box">ℹ️</div>
-                    <p><strong>Sebelumnya:</strong> <code>http://43.218.242.155:3000</code><br>
-                        <strong>Setelah Nginx:</strong> <code>http://43.218.242.155</code> (tanpa port!)
+                    <p><strong>Sebelum:</strong> <code>http://43.218.242.155:3000</code> ❌ (pakai IP + port)<br>
+                        <strong>Sesudah:</strong> <code>http://cuynotes.domainmu.com</code> ✅ (pakai domain, tanpa
+                        port!)
                     </p>
                 </div>
 
-                <h3>🖥️ Cara 1: Via aaPanel Dashboard</h3>
+                <h3>📊 Bagaimana Cara Kerjanya?</h3>
+                <div class="config-block" style="text-align: center; font-size: 0.9rem; line-height: 2;">User ketik:
+                    <span class="highlight">cuynotes.domainmu.com</span>
+                    ↓
+                    <span class="string">DNS Record (A Record)</span> → arahkan ke IP server: <span
+                        class="highlight">43.218.242.155</span>
+                    ↓
+                    <span class="string">Nginx (port 80)</span> → terima request di port 80
+                    ↓
+                    ┌─────────────────────────────────────┐
+                    │ <span class="command">location /</span> → port 3000 (Frontend) │
+                    │ <span class="command">location /api/</span> → port 5001 (Backend) │
+                    └─────────────────────────────────────┘
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Step 7.1 -->
+                <h3>📡 7.1 — Setup DNS Record (di Domain Provider)</h3>
+                <p>Pertama, arahkan domain/subdomain kamu ke IP server. Ini dilakukan di panel domain provider kamu
+                    (tempat kamu beli domain).</p>
+
+                <ol class="step-list">
+                    <li>
+                        <strong>Login ke Domain Provider</strong>
+                        <p>Buka dashboard domain provider kamu. Berikut beberapa contoh provider populer:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Provider</th>
+                                    <th>Menu DNS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Cloudflare</strong></td>
+                                    <td>Dashboard → pilih domain → <strong>DNS</strong> → <strong>Records</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Namecheap</strong></td>
+                                    <td>Domain List → <strong>Manage</strong> → <strong>Advanced DNS</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Niagahoster</strong></td>
+                                    <td>Domain → <strong>Kelola</strong> → <strong>DNS / Nameserver</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GoDaddy</strong></td>
+                                    <td>My Products → Domain → <strong>DNS</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Google Domains</strong></td>
+                                    <td>My domains → <strong>DNS</strong> → <strong>Custom records</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </li>
+                    <li>
+                        <strong>Tambah A Record</strong>
+                        <p>Klik <strong>"Add Record"</strong> atau <strong>"Tambah Record"</strong>, lalu isi:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>Nilai</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Type</strong></td>
+                                    <td><code>A</code></td>
+                                    <td>Record tipe A (Address)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name / Host</strong></td>
+                                    <td><code>cuynotes</code></td>
+                                    <td>Subdomain yang diinginkan. Jika ingin pakai domain utama, isi <code>@</code>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Value / Target</strong></td>
+                                    <td><code>43.218.242.155</code></td>
+                                    <td>IP publik server aaPanel kamu</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>TTL</strong></td>
+                                    <td><code>Auto</code> atau <code>300</code></td>
+                                    <td>Biarkan default</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="info-box tip">
+                            <div class="icon-box">💡</div>
+                            <p><strong>Contoh:</strong> Jika domain kamu <code>yuwancornelius.com</code> dan Name diisi
+                                <code>cuynotes</code>,
+                                maka hasilnya: <code>cuynotes.yuwancornelius.com</code> → <code>43.218.242.155</code>
+                            </p>
+                        </div>
+                    </li>
+                    <li>
+                        <strong>Tunggu DNS Propagasi</strong>
+                        <p>DNS membutuhkan waktu <strong>1-30 menit</strong> untuk propagasi (kadang hingga 24 jam, tapi
+                            biasanya cepat).</p>
+                        <p>Cek apakah DNS sudah aktif dengan menjalankan di terminal lokal:</p>
+                        <pre><span class="comment"># Cek DNS propagasi</span>
+<span class="command">ping</span> cuynotes.domainmu.com
+
+<span class="comment"># Atau cek online di: https://dnschecker.org</span></pre>
+                        <p>Jika sudah menunjuk ke IP server kamu, DNS sudah aktif! ✅</p>
+                    </li>
+                </ol>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Cloudflare Users:</strong> Jika menggunakan Cloudflare, pastikan <strong>Proxy
+                            Status</strong>
+                        di-set ke
+                        <strong>"DNS Only"</strong> (ikon awan abu-abu) saat testing. Setelah semuanya jalan, baru
+                        aktifkan
+                        proxy (awan oranye).
+                    </p>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Step 7.2 -->
+                <h3>🖥️ 7.2 — Setup Nginx di aaPanel</h3>
+                <p>Setelah DNS mengarah ke server, setup Nginx sebagai reverse proxy agar port 80 meneruskan ke
+                    aplikasi.</p>
+
                 <ol class="step-list">
                     <li>
                         <strong>Buka Website → Add Site</strong>
@@ -1064,7 +1196,9 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Domain</strong></td>
-                                    <td>IP publik server kamu, contoh: <code>43.218.242.155</code></td>
+                                    <td>Domain/subdomain kamu, contoh: <code>cuynotes.yuwancornelius.com</code><br>
+                                        <em>Atau jika belum punya domain, pakai IP: <code>43.218.242.155</code></em>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td><strong>Root Directory</strong></td>
@@ -1081,21 +1215,21 @@
                     </li>
                     <li>
                         <strong>Buka Konfigurasi Nginx Site</strong>
-                        <p>Setelah site dibuat, klik nama site yang baru saja dibuat (misalnya
-                            <code>43.218.242.155</code>).
+                        <p>Setelah site dibuat, klik nama site yang baru saja dibuat.
                             Di halaman pengaturan site, klik tab <strong>"Config"</strong> atau <strong>"Conf"</strong>
                             (biasanya di baris tab paling kanan).</p>
                     </li>
                     <li>
                         <strong>Ganti Seluruh Isi Konfigurasi Nginx</strong>
                         <p><strong>Hapus semua isi</strong> yang ada di editor, lalu <strong>paste</strong> konfigurasi
-                            berikut:</p>
+                            berikut:
+                        </p>
                     </li>
                 </ol>
 
                 <div class="config-block">server {
                     listen 80;
-                    server_name <span class="highlight">GANTI_DENGAN_IP_ATAU_DOMAIN</span>;
+                    server_name <span class="highlight">GANTI_DENGAN_DOMAIN_ATAU_IP</span>;
 
                     access_log /www/wwwlogs/cuynotes.log;
                     error_log /www/wwwlogs/cuynotes.error.log;
@@ -1124,77 +1258,116 @@
                     }
                     }</div>
 
+                <div class="info-box danger">
+                    <div class="icon-box">🚨</div>
+                    <p><strong>Ganti <code>GANTI_DENGAN_DOMAIN_ATAU_IP</code></strong> dengan domain/subdomain atau IP
+                        kamu.<br>
+                        Contoh: <code>cuynotes.yuwancornelius.com</code> atau <code>43.218.242.155</code></p>
+                </div>
+
                 <ol class="step-list" style="counter-reset: steps 3;">
-                    <li>
-                        <strong>Ganti IP / Domain</strong>
-                        <p>Ganti <code>GANTI_DENGAN_IP_ATAU_DOMAIN</code> dengan IP publik atau domain kamu.
-                            Contoh: <code>43.218.242.155</code> atau <code>cuynotes.example.com</code>.</p>
-                    </li>
                     <li>
                         <strong>Klik Save</strong>
                         <p>Klik tombol <strong>"Save"</strong>. Nginx akan otomatis reload konfigurasi.</p>
-                    </li>
-                    <li>
-                        <strong>Update NEXT_PUBLIC_API_URL di Docker Compose</strong>
-                        <p>Karena API sekarang diakses lewat Nginx (tanpa port 5001), update environment di Docker
-                            Compose:</p>
-                        <p>Buka aaPanel → <strong>Docker</strong> → tab <strong>Compose</strong> → klik
-                            <strong>cuynotes</strong> → edit <strong>Configuration File</strong>.</p>
-                        <p>Cari baris:</p>
-                        <pre>NEXT_PUBLIC_API_URL: http://43.218.242.155:<span class="highlight">5001</span>/api</pre>
-                        <p>Ganti menjadi (tanpa port):</p>
-                        <pre>NEXT_PUBLIC_API_URL: http://43.218.242.155/api</pre>
-                        <p>Klik <strong>Save</strong>, lalu rebuild container frontend.</p>
-                    </li>
-                    <li>
-                        <strong>Rebuild Frontend Container</strong>
-                        <p>Di aaPanel Docker Dashboard, klik <strong>"Update Image"</strong> pada compose cuynotes. Atau
-                            via Terminal:</p>
-                        <pre><span class="command">cd</span> /www/wwwroot/notes-app
-<span class="command">sudo docker compose -f docker-compose.prod.yml build --no-cache</span> frontend_nextjs
-<span class="command">sudo docker compose -f docker-compose.prod.yml up -d</span> --force-recreate</pre>
-                    </li>
-                    <li>
-                        <strong>Test Akses</strong>
-                        <p>Buka browser dan akses:</p>
-                        <ul style="padding-left: 20px; color: #475569;">
-                            <li>🌐 Frontend: <code>http://IP_SERVER</code> (tanpa port!)</li>
-                            <li>🔌 Backend API: <code>http://IP_SERVER/api/health</code></li>
-                        </ul>
                     </li>
                 </ol>
 
                 <div class="divider"></div>
 
-                <h3>⌨️ Cara 2: Via Terminal (Manual)</h3>
-                <p>Jika ingin setup Nginx tanpa via aaPanel Website menu:</p>
-                <pre><span class="comment"># Buat file konfigurasi Nginx</span>
-<span class="command">sudo nano</span> /www/server/panel/vhost/nginx/cuynotes.conf</pre>
+                <!-- Step 7.3 -->
+                <h3>🔄 7.3 — Update NEXT_PUBLIC_API_URL</h3>
+                <p>Karena API sekarang diakses lewat Nginx (tanpa port 5001), kita perlu update environment di Docker
+                    Compose
+                    agar frontend mengarah ke URL yang benar.</p>
 
-                <p>Paste konfigurasi Nginx yang sama seperti di atas, lalu save dan reload:</p>
-                <pre><span class="comment"># Test konfigurasi</span>
-<span class="command">sudo nginx -t</span>
+                <ol class="step-list">
+                    <li>
+                        <strong>Buka Docker Compose Configuration</strong>
+                        <p>Di aaPanel → <strong>Docker</strong> → tab <strong>Compose</strong> → klik nama compose
+                            <strong>cuynotes</strong> → di panel kanan, edit <strong>Configuration File</strong>
+                            (<code>compose.yaml</code>).
+                        </p>
+                    </li>
+                    <li>
+                        <strong>Ganti NEXT_PUBLIC_API_URL</strong>
+                        <p>Cari baris ini di bagian <code>frontend_nextjs</code>:</p>
+                        <pre>NEXT_PUBLIC_API_URL: http://43.218.242.155:<span class="highlight">5001</span>/api</pre>
+                        <p><strong>Ganti menjadi</strong> (tanpa port, pakai domain atau IP):</p>
+                        <pre><span class="comment"># Jika pakai domain:</span>
+NEXT_PUBLIC_API_URL: http://<span class="highlight">cuynotes.domainmu.com</span>/api
 
-<span class="comment"># Reload Nginx</span>
-<span class="command">sudo systemctl reload nginx</span></pre>
+<span class="comment"># Atau jika pakai IP saja (tanpa domain):</span>
+NEXT_PUBLIC_API_URL: http://<span class="highlight">43.218.242.155</span>/api</pre>
+                        <p>Klik <strong>Save</strong>.</p>
+                    </li>
+                    <li>
+                        <strong>Rebuild Frontend Container</strong>
+                        <p>Setelah save, frontend perlu di-rebuild agar menggunakan URL baru. Via Terminal aaPanel:</p>
+                        <pre><span class="command">cd</span> /www/wwwroot/notes-app
 
-                <div class="info-box warning">
-                    <div class="icon-box">⚠️</div>
-                    <p><strong>Penting:</strong> Setelah setup Nginx reverse proxy, pastikan
-                        <code>NEXT_PUBLIC_API_URL</code>
-                        di Docker Compose sudah berubah ke <code>http://IP_SERVER/api</code> (tanpa port 5001).
-                        Jika belum, frontend akan tetap mencoba akses langsung ke port 5001.</p>
-                </div>
+<span class="comment"># Rebuild frontend saja</span>
+<span class="command">sudo docker compose -f docker-compose.prod.yml build --no-cache</span> frontend_nextjs
+
+<span class="comment"># Restart semua container</span>
+<span class="command">sudo docker compose -f docker-compose.prod.yml up -d</span> --force-recreate</pre>
+
+                        <p>Atau di aaPanel Docker Dashboard, klik <strong>"Update Image"</strong> pada compose cuynotes
+                            lalu
+                            rebuild.</p>
+                    </li>
+                </ol>
+
+                <div class="divider"></div>
+
+                <!-- Step 7.4 -->
+                <h3>✅ 7.4 — Test Akses</h3>
+                <p>Buka browser dan akses:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Apa yang ditampilkan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>http://cuynotes.domainmu.com</code></td>
+                            <td>🌐 Halaman login/register CuyNotes</td>
+                        </tr>
+                        <tr>
+                            <td><code>http://cuynotes.domainmu.com/api/health</code></td>
+                            <td>🔌 Response JSON dari backend API</td>
+                        </tr>
+                        <tr>
+                            <td><code>http://43.218.242.155</code></td>
+                            <td>🌐 Juga bisa diakses via IP (tanpa port)</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <div class="info-box tip">
                     <div class="icon-box">💡</div>
-                    <p><strong>Tips:</strong> Setelah Nginx aktif, kamu bisa menutup port 3000 dan 5001 di firewall
-                        karena
-                        semua traffic sekarang lewat port 80 via Nginx. Cukup buka port <strong>80</strong> saja.</p>
+                    <p><strong>Tips keamanan:</strong> Setelah Nginx aktif dan semua berjalan, kamu bisa <strong>menutup
+                            port
+                            3000 dan 5001</strong>
+                        di firewall (Lightsail/aaPanel Security). Semua traffic sekarang lewat port <strong>80</strong>
+                        via
+                        Nginx.
+                        Ini lebih aman karena mengurangi surface attack.</p>
+                </div>
+
+                <div class="info-box info">
+                    <div class="icon-box">🔒</div>
+                    <p><strong>HTTPS/SSL (opsional):</strong> Untuk mengaktifkan HTTPS, di aaPanel klik site kamu → tab
+                        <strong>"SSL"</strong>
+                        → pilih <strong>"Let's Encrypt"</strong> → klik <strong>"Apply"</strong>. SSL gratis akan
+                        otomatis
+                        terpasang
+                        dan traffic akan di-redirect ke HTTPS.
+                    </p>
                 </div>
             </div>
         </section>
-
         <!-- Section 8 -->
         <section id="firewall">
             <div class="section-card">
