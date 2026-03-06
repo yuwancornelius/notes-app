@@ -1035,14 +1035,25 @@
         <section id="setup-nginx">
             <div class="section-card">
                 <h2><span class="icon">🌐</span> Konfigurasi Nginx Reverse Proxy</h2>
-                <p>Agar aplikasi bisa diakses tanpa menyebutkan port (langsung via domain/IP), setup Nginx sebagai
-                    reverse proxy.</p>
+                <p>Agar aplikasi bisa diakses <strong>tanpa port</strong> (langsung via IP atau domain), setup Nginx
+                    sebagai
+                    reverse proxy. Ini akan meneruskan request dari port 80 ke port 3000 (frontend) dan /api ke port
+                    5001 (backend).</p>
 
-                <h3>Via aaPanel Dashboard</h3>
+                <div class="info-box info">
+                    <div class="icon-box">ℹ️</div>
+                    <p><strong>Sebelumnya:</strong> <code>http://43.218.242.155:3000</code><br>
+                        <strong>Setelah Nginx:</strong> <code>http://43.218.242.155</code> (tanpa port!)
+                    </p>
+                </div>
+
+                <h3>🖥️ Cara 1: Via aaPanel Dashboard</h3>
                 <ol class="step-list">
                     <li>
                         <strong>Buka Website → Add Site</strong>
-                        <p>Klik <strong>"Website"</strong> di sidebar → <strong>"Add site"</strong>.</p>
+                        <p>Di sidebar aaPanel, klik <strong>"Website"</strong> → klik tombol <strong>"Add
+                                site"</strong>.</p>
+                        <p>Isi form berikut:</p>
                         <table>
                             <thead>
                                 <tr>
@@ -1053,7 +1064,7 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Domain</strong></td>
-                                    <td>Domain atau IP server kamu</td>
+                                    <td>IP publik server kamu, contoh: <code>43.218.242.155</code></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Root Directory</strong></td>
@@ -1061,25 +1072,35 @@
                                 </tr>
                                 <tr>
                                     <td><strong>PHP Version</strong></td>
-                                    <td>Static</td>
+                                    <td>Static (pilih <strong>"Static"</strong> atau <strong>"Pure Static"</strong>)
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                        <p>Klik <strong>"Submit"</strong> untuk membuat site.</p>
                     </li>
                     <li>
-                        <strong>Edit Nginx Config</strong>
-                        <p>Klik nama site → Tab <strong>"Config"</strong>. Hapus semua isi, ganti dengan:</p>
+                        <strong>Buka Konfigurasi Nginx Site</strong>
+                        <p>Setelah site dibuat, klik nama site yang baru saja dibuat (misalnya
+                            <code>43.218.242.155</code>).
+                            Di halaman pengaturan site, klik tab <strong>"Config"</strong> atau <strong>"Conf"</strong>
+                            (biasanya di baris tab paling kanan).</p>
+                    </li>
+                    <li>
+                        <strong>Ganti Seluruh Isi Konfigurasi Nginx</strong>
+                        <p><strong>Hapus semua isi</strong> yang ada di editor, lalu <strong>paste</strong> konfigurasi
+                            berikut:</p>
                     </li>
                 </ol>
 
                 <div class="config-block">server {
                     listen 80;
-                    server_name <span class="highlight">DOMAIN_ATAU_IP_KAMU</span>;
+                    server_name <span class="highlight">GANTI_DENGAN_IP_ATAU_DOMAIN</span>;
 
                     access_log /www/wwwlogs/cuynotes.log;
                     error_log /www/wwwlogs/cuynotes.error.log;
 
-                    # Frontend (port 3000)
+                    # Frontend Next.js (port 3000)
                     location / {
                     proxy_pass http://127.0.0.1:3000;
                     proxy_http_version 1.1;
@@ -1092,7 +1113,7 @@
                     proxy_cache_bypass $http_upgrade;
                     }
 
-                    # Backend API (port 5001)
+                    # Backend API Flask (port 5001)
                     location /api/ {
                     proxy_pass http://127.0.0.1:5001/api/;
                     proxy_http_version 1.1;
@@ -1103,13 +1124,73 @@
                     }
                     }</div>
 
+                <ol class="step-list" style="counter-reset: steps 3;">
+                    <li>
+                        <strong>Ganti IP / Domain</strong>
+                        <p>Ganti <code>GANTI_DENGAN_IP_ATAU_DOMAIN</code> dengan IP publik atau domain kamu.
+                            Contoh: <code>43.218.242.155</code> atau <code>cuynotes.example.com</code>.</p>
+                    </li>
+                    <li>
+                        <strong>Klik Save</strong>
+                        <p>Klik tombol <strong>"Save"</strong>. Nginx akan otomatis reload konfigurasi.</p>
+                    </li>
+                    <li>
+                        <strong>Update NEXT_PUBLIC_API_URL di Docker Compose</strong>
+                        <p>Karena API sekarang diakses lewat Nginx (tanpa port 5001), update environment di Docker
+                            Compose:</p>
+                        <p>Buka aaPanel → <strong>Docker</strong> → tab <strong>Compose</strong> → klik
+                            <strong>cuynotes</strong> → edit <strong>Configuration File</strong>.</p>
+                        <p>Cari baris:</p>
+                        <pre>NEXT_PUBLIC_API_URL: http://43.218.242.155:<span class="highlight">5001</span>/api</pre>
+                        <p>Ganti menjadi (tanpa port):</p>
+                        <pre>NEXT_PUBLIC_API_URL: http://43.218.242.155/api</pre>
+                        <p>Klik <strong>Save</strong>, lalu rebuild container frontend.</p>
+                    </li>
+                    <li>
+                        <strong>Rebuild Frontend Container</strong>
+                        <p>Di aaPanel Docker Dashboard, klik <strong>"Update Image"</strong> pada compose cuynotes. Atau
+                            via Terminal:</p>
+                        <pre><span class="command">cd</span> /www/wwwroot/notes-app
+<span class="command">sudo docker compose -f docker-compose.prod.yml build --no-cache</span> frontend_nextjs
+<span class="command">sudo docker compose -f docker-compose.prod.yml up -d</span> --force-recreate</pre>
+                    </li>
+                    <li>
+                        <strong>Test Akses</strong>
+                        <p>Buka browser dan akses:</p>
+                        <ul style="padding-left: 20px; color: #475569;">
+                            <li>🌐 Frontend: <code>http://IP_SERVER</code> (tanpa port!)</li>
+                            <li>🔌 Backend API: <code>http://IP_SERVER/api/health</code></li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="divider"></div>
+
+                <h3>⌨️ Cara 2: Via Terminal (Manual)</h3>
+                <p>Jika ingin setup Nginx tanpa via aaPanel Website menu:</p>
+                <pre><span class="comment"># Buat file konfigurasi Nginx</span>
+<span class="command">sudo nano</span> /www/server/panel/vhost/nginx/cuynotes.conf</pre>
+
+                <p>Paste konfigurasi Nginx yang sama seperti di atas, lalu save dan reload:</p>
+                <pre><span class="comment"># Test konfigurasi</span>
+<span class="command">sudo nginx -t</span>
+
+<span class="comment"># Reload Nginx</span>
+<span class="command">sudo systemctl reload nginx</span></pre>
+
                 <div class="info-box warning">
                     <div class="icon-box">⚠️</div>
-                    <p>Ganti <code>DOMAIN_ATAU_IP_KAMU</code> dengan IP/domain kamu. Jika pakai Nginx reverse proxy,
-                        update <code>client/.env</code> menjadi
-                        <code>NEXT_PUBLIC_API_URL=http://DOMAIN_ATAU_IP/api</code> (tanpa port), lalu rebuild:
-                        <code>docker compose up --build -d</code>.
-                    </p>
+                    <p><strong>Penting:</strong> Setelah setup Nginx reverse proxy, pastikan
+                        <code>NEXT_PUBLIC_API_URL</code>
+                        di Docker Compose sudah berubah ke <code>http://IP_SERVER/api</code> (tanpa port 5001).
+                        Jika belum, frontend akan tetap mencoba akses langsung ke port 5001.</p>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips:</strong> Setelah Nginx aktif, kamu bisa menutup port 3000 dan 5001 di firewall
+                        karena
+                        semua traffic sekarang lewat port 80 via Nginx. Cukup buka port <strong>80</strong> saja.</p>
                 </div>
             </div>
         </section>
