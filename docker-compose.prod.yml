@@ -3,17 +3,17 @@ services:
     image: mysql:8.0
     container_name: cuynotes_db
     restart: always
+    network_mode: host
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: cuynotes
       MYSQL_USER: notes_user
       MYSQL_PASSWORD: notes_password
-    ports:
-      - "3306:3306"
+      MYSQL_TCP_PORT: 3307
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-P", "3307" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,14 +24,13 @@ services:
       dockerfile: Dockerfile
     container_name: backend_flask
     restart: always
-    ports:
-      - "5001:5001"
+    network_mode: host
     environment:
       FLASK_APP: main.py
-      FLASK_ENV: development
+      FLASK_ENV: production
       SECRET_KEY: notes-app-secret-key-change-in-production
       JWT_SECRET_KEY: jwt-super-secret-key-2026
-      DATABASE_URL: mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes
+      DATABASE_URL: mysql+pymysql://notes_user:notes_password@127.0.0.1:3307/cuynotes
     depends_on:
       cuynotes_db:
         condition: service_healthy
@@ -42,10 +41,9 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_nextjs
     restart: always
-    ports:
-      - "3000:3000"
+    network_mode: host
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:5001/api
+      NEXT_PUBLIC_API_URL: http://IP_SERVER:5001/api
     depends_on:
       - backend_flask
 
