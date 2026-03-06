@@ -3,10 +3,12 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install && chmod -R +x node_modules/.bin/
+RUN npm install
 
 COPY . .
 
+RUN chmod -R +x node_modules/.bin/ 2>/dev/null || true
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["node", "node_modules/next/dist/bin/next", "dev"]
