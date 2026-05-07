@@ -31,6 +31,8 @@ services:
       SECRET_KEY: notes-app-secret-key-change-in-production
       JWT_SECRET_KEY: jwt-super-secret-key-2026
       DATABASE_URL: mysql+pymysql://notes_user:notes_password@127.0.0.1:3307/cuynotes
+      SUPER_ADMIN_EMAIL: superadmin@cuynotes.com
+      SUPER_ADMIN_PASSWORD: SuperAdmin@2026
     depends_on:
       cuynotes_db:
         condition: service_healthy
