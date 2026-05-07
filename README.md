@@ -8,7 +8,7 @@
 
 # 📝 CuyNotes
 
-> Full-stack Notes Application dengan fitur proteksi password, visibilitas catatan, dan manajemen pengguna — dibangun menggunakan **Next.js**, **Flask**, **MySQL**, dan **Docker**.
+> Full-stack Notes Application dengan fitur proteksi password, visibilitas catatan, **Super Admin dashboard**, dan manajemen pengguna — dibangun menggunakan **Next.js**, **Flask**, **MySQL**, dan **Docker**.
 
 ---
 
@@ -25,6 +25,9 @@
 | 🔍 **Search** | Cari catatan berdasarkan judul atau isi |
 | 👤 **Profile** | Kelola profil dan ubah password akun |
 | 📱 **Responsive** | Tampilan responsif untuk desktop dan mobile |
+| 🛡️ **Super Admin** | Dashboard admin untuk mengelola semua user & notes |
+| 🚫 **Ban/Unban User** | Admin bisa memblokir dan membuka blokir akun user |
+| 📊 **Admin Dashboard** | Statistik overview (total user, notes, banned users) |
 
 ---
 
@@ -91,8 +94,9 @@ docker compose up --build -d
 
 ```
 notes-app/
-├── docker-compose.yml          # Docker orchestration
-├── deployment-guide.html       # Panduan deployment lengkap
+├── docker-compose.yml          # Docker orchestration (dev)
+├── docker-compose.prod.yml     # Docker orchestration (production)
+├── aapanel-docker-guide.html   # Panduan deployment aaPanel + Docker
 │
 ├── backend/                    # Flask Backend
 │   ├── Dockerfile
@@ -103,14 +107,15 @@ notes-app/
 │       ├── __init__.py         # App factory
 │       ├── config.py           # Configuration
 │       ├── models/             # Database models
-│       │   ├── user.py
+│       │   ├── user.py         # User model (role, ban status)
 │       │   ├── note.py
 │       │   └── favorite.py
 │       ├── routes/             # API endpoints
-│       │   ├── auth.py
-│       │   ├── notes.py
-│       │   └── favorites.py
-│       ├── utils/              # JWT helpers
+│       │   ├── auth.py         # Auth routes
+│       │   ├── notes.py        # Notes CRUD
+│       │   ├── favorites.py    # Favorites toggle
+│       │   └── admin.py        # 🛡️ Super Admin routes
+│       ├── utils/              # JWT helpers, admin decorator
 │       └── services/           # Business logic
 │
 └── client/                     # Next.js Frontend
@@ -119,6 +124,11 @@ notes-app/
     ├── package.json
     └── src/
         ├── app/                # Pages (App Router)
+        │   └── admin/          # 🛡️ Admin pages
+        │       ├── layout.js   # Admin auth guard
+        │       ├── page.js     # Dashboard
+        │       ├── users/      # Kelola user
+        │       └── notes/      # Kelola notes
         ├── components/         # React components
         ├── services/           # API service
         ├── store/              # Auth context
@@ -138,6 +148,8 @@ notes-app/
 | `SECRET_KEY` | Secret key untuk Flask session | *(ganti untuk production)* |
 | `JWT_SECRET_KEY` | Secret key untuk JWT token | *(ganti untuk production)* |
 | `DATABASE_URL` | Connection string MySQL | `mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes` |
+| `SUPER_ADMIN_EMAIL` | Email login Super Admin | `superadmin@cuynotes.com` |
+| `SUPER_ADMIN_PASSWORD` | Password login Super Admin | `SuperAdmin@2026` |
 
 ### Frontend (`client/.env`)
 
@@ -153,7 +165,7 @@ notes-app/
 
 | Service | Container | Port | Image |
 |---------|-----------|------|-------|
-| **Frontend** | `frontend_nextjs` | `3000` | Node 20 Alpine |
+| **Frontend** | `frontend_nextjs` | `3000` | Node 20 Slim |
 | **Backend** | `backend_flask` | `5001` | Python 3.11 Slim |
 | **Database** | `cuynotes_db` | `3306` | MySQL 8.0 |
 
@@ -187,6 +199,11 @@ docker exec -it cuynotes_db mysql -u notes_user -pnotes_password cuynotes
 | `username` | VARCHAR | Username unik |
 | `email` | VARCHAR | Email unik |
 | `password_hash` | VARCHAR | Hash password (bcrypt) |
+| `avatar` | VARCHAR | URL avatar (opsional) |
+| `role` | VARCHAR | `user` atau `superadmin` |
+| `is_banned` | BOOLEAN | Status banned (default: `false`) |
+| `security_question` | VARCHAR | Pertanyaan keamanan |
+| `security_answer_hash` | VARCHAR | Hash jawaban keamanan |
 | `created_at` | DATETIME | Tanggal registrasi |
 
 ### Tabel `notes`
@@ -217,8 +234,8 @@ docker exec -it cuynotes_db mysql -u notes_user -pnotes_password cuynotes
 |--------|----------|-----------|
 | `POST` | `/api/auth/register` | Registrasi user baru |
 | `POST` | `/api/auth/login` | Login dan dapatkan JWT token |
-| `GET` | `/api/auth/profile` | Lihat profil user |
-| `PUT` | `/api/auth/profile` | Update profil user |
+| `GET` | `/api/auth/me` | Lihat profil user |
+| `PUT` | `/api/auth/me` | Update profil user |
 
 ### Notes
 | Method | Endpoint | Deskripsi |
@@ -229,7 +246,7 @@ docker exec -it cuynotes_db mysql -u notes_user -pnotes_password cuynotes
 | `GET` | `/api/notes/:id` | Lihat detail note |
 | `PUT` | `/api/notes/:id` | Update note |
 | `DELETE` | `/api/notes/:id` | Hapus note |
-| `POST` | `/api/notes/:id/verify` | Verifikasi password note |
+| `POST` | `/api/notes/:id/verify-password` | Verifikasi password note |
 
 ### Favorites
 | Method | Endpoint | Deskripsi |
@@ -237,11 +254,54 @@ docker exec -it cuynotes_db mysql -u notes_user -pnotes_password cuynotes
 | `GET` | `/api/favorites` | Ambil daftar favorit |
 | `POST` | `/api/favorites/:id` | Toggle favorit |
 
+### 🛡️ Super Admin
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| `GET` | `/api/admin/stats` | Dashboard statistik |
+| `GET` | `/api/admin/users` | List semua user (pagination + search) |
+| `GET` | `/api/admin/users/:id` | Detail user |
+| `PUT` | `/api/admin/users/:id` | Edit user |
+| `DELETE` | `/api/admin/users/:id` | Hapus user + semua notes-nya |
+| `POST` | `/api/admin/users/:id/ban` | Ban user |
+| `POST` | `/api/admin/users/:id/unban` | Unban user |
+| `GET` | `/api/admin/notes` | List semua notes |
+| `GET` | `/api/admin/notes/:id` | Detail note (bypass password) |
+| `PUT` | `/api/admin/notes/:id` | Edit note |
+| `DELETE` | `/api/admin/notes/:id` | Hapus note |
+
+---
+
+## 🛡️ Super Admin
+
+CuyNotes memiliki fitur **Super Admin** untuk mengelola seluruh platform.
+
+### Login
+| Field | Nilai |
+|-------|-------|
+| **Email** | Sesuai env `SUPER_ADMIN_EMAIL` (default: `superadmin@cuynotes.com`) |
+| **Password** | Sesuai env `SUPER_ADMIN_PASSWORD` (default: `SuperAdmin@2026`) |
+| **Dashboard** | `http://localhost:3000/admin` |
+
+### Fitur Admin
+- 📊 **Dashboard** — Statistik total user, notes, banned users, notes per visibilitas
+- 👥 **Kelola User** — Edit profil, reset password, hapus user (+ semua notes), ban/unban
+- 📝 **Kelola Notes** — Lihat, edit, hapus semua notes (bypass private/protected)
+
+> 💡 Super Admin menggunakan credential dari environment variable, bukan database. Akun admin tidak bisa di-ban atau dihapus.
+
 ---
 
 ## 📋 Deployment Guide
 
-Untuk panduan deployment lengkap (termasuk Docker Desktop & CLI, troubleshooting, dan akses MySQL), buka file **`deployment-guide.html`** di browser kamu.
+Untuk panduan deployment lengkap ke VPS menggunakan aaPanel + Docker, buka file **`aapanel-docker-guide.html`** di browser kamu.
+
+> **Penting untuk update dari versi lama:** Jika sudah punya database sebelumnya, jalankan migrasi:
+> ```bash
+> docker exec -i cuynotes_db mysql -u notes_user -pnotes_password cuynotes -e "
+>   ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user' AFTER avatar;
+>   ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT FALSE AFTER role;
+> "
+> ```
 
 ---
 
