@@ -648,7 +648,11 @@
 <span class="keyword">FLASK_ENV</span>=<span class="string">production</span>
 <span class="keyword">SECRET_KEY</span>=<span class="string">GANTI_SECRET_KEY_RANDOM</span>
 <span class="keyword">JWT_SECRET_KEY</span>=<span class="string">GANTI_JWT_SECRET_RANDOM</span>
-<span class="keyword">DATABASE_URL</span>=<span class="string">mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes</span></pre>
+<span class="keyword">DATABASE_URL</span>=<span class="string">mysql+pymysql://notes_user:notes_password@cuynotes_db:3306/cuynotes</span>
+
+<span class="comment"># Super Admin credentials</span>
+<span class="keyword">SUPER_ADMIN_EMAIL</span>=<span class="string">superadmin@cuynotes.com</span>
+<span class="keyword">SUPER_ADMIN_PASSWORD</span>=<span class="string">SuperAdmin@2026</span></pre>
 
                 <div class="info-box warning">
                     <div class="icon-box">⚠️</div>
@@ -831,6 +835,8 @@
       SECRET_KEY: <span class="string">GANTI_SECRET_KEY_RANDOM</span>
       JWT_SECRET_KEY: <span class="string">GANTI_JWT_SECRET_RANDOM</span>
       DATABASE_URL: <span class="string">mysql+pymysql://notes_user:notes_password@127.0.0.1:3307/cuynotes</span>
+      SUPER_ADMIN_EMAIL: <span class="string">superadmin@cuynotes.com</span>
+      SUPER_ADMIN_PASSWORD: <span class="highlight">GANTI_PASSWORD_ADMIN</span>
     depends_on:
       cuynotes_db:
         condition: service_healthy
@@ -864,6 +870,8 @@
                                 </li>
                                 <li><code>root_password</code> dan <code>notes_password</code> → password yang kuat
                                     untuk production</li>
+                                <li><code>GANTI_PASSWORD_ADMIN</code> → password Super Admin yang kuat (min 12 karakter)
+                                </li>
                             </ul>
                         </div>
 
@@ -1643,9 +1651,77 @@ ENDCONF</pre>
                             <li>✅ Login berhasil</li>
                             <li>✅ Buat note (public, private, protected)</li>
                             <li>✅ Note protected diminta password</li>
+                            <li>✅ Login Super Admin (lihat langkah 9.3)</li>
                         </ul>
                     </li>
                 </ol>
+
+                <div class="divider"></div>
+
+                <!-- Step 9.3 -->
+                <h3>🛡️ 9.3 — Login Super Admin</h3>
+                <p>CuyNotes memiliki fitur <strong>Super Admin</strong> yang bisa mengelola semua user dan notes dari
+                    dashboard admin.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Email</strong></td>
+                            <td><code>superadmin@cuynotes.com</code> (sesuai env <code>SUPER_ADMIN_EMAIL</code>)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Password</strong></td>
+                            <td>Sesuai env <code>SUPER_ADMIN_PASSWORD</code> yang kamu set</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dashboard</strong></td>
+                            <td><code>https://domainmu.com/admin</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>Setelah login sebagai Super Admin, kamu bisa:</p>
+                <ul style="padding-left: 20px; color: #475569;">
+                    <li>📊 Melihat <strong>Dashboard</strong> — statistik total user, notes, banned users</li>
+                    <li>👥 <strong>Kelola User</strong> — edit, hapus, ban/unban akun user</li>
+                    <li>📝 <strong>Kelola Notes</strong> — lihat, edit, hapus semua notes (termasuk private/protected)
+                    </li>
+                </ul>
+
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Penting:</strong> Super Admin menggunakan credential dari environment variable
+                        (<code>SUPER_ADMIN_EMAIL</code> / <code>SUPER_ADMIN_PASSWORD</code>), bukan dari database.
+                        Pastikan password yang diset di <code>docker-compose.prod.yml</code> cukup kuat!
+                    </p>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Step 9.4 -->
+                <h3>🗃️ 9.4 — Migrasi Database (Update dari Versi Sebelumnya)</h3>
+                <p>Jika kamu sudah punya database dari versi sebelumnya (sebelum fitur Super Admin), tabel <code>users</code>
+                    perlu ditambahkan 2 kolom baru: <code>role</code> dan <code>is_banned</code>.</p>
+
+                <p><strong>Jalankan perintah ini via Terminal aaPanel:</strong></p>
+                <pre><span class="comment"># Masuk ke container MySQL</span>
+<span class="command">docker exec -i cuynotes_db</span> mysql -u notes_user -pnotes_password cuynotes -e "
+  <span class="highlight">ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'user' AFTER avatar;</span>
+  <span class="highlight">ALTER TABLE users ADD COLUMN is_banned BOOLEAN NOT NULL DEFAULT FALSE AFTER role;</span>
+"</pre>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Tips:</strong> Jika ini adalah <strong>fresh install</strong> (database baru / pertama kali
+                        deploy), kolom ini sudah otomatis ada dan kamu <strong>tidak perlu</strong> menjalankan perintah
+                        di atas. Perintah ini hanya untuk <strong>update dari versi lama</strong>.</p>
+                </div>
             </div>
         </section>
 
@@ -1677,7 +1753,7 @@ ENDCONF</pre>
                     execute permission di Linux.</p>
                 <p><strong>Solusi:</strong> Sudah di-fix di Dockerfile client. CMD menjalankan next langsung via node:
                 </p>
-                <pre>CMD ["node", "node_modules/next/dist/bin/next", "dev", "-H", "0.0.0.0"]</pre>
+                <pre>CMD ["node", "node_modules/next/dist/bin/next", "start", "-H", "0.0.0.0"]</pre>
 
                 <h3>❌ Build: "unable to prepare context: path not found"</h3>
                 <p><strong>Penyebab:</strong> aaPanel Compose menyimpan file di
@@ -1757,6 +1833,12 @@ ENDCONF</pre>
 <span class="command">sudo docker compose -f docker-compose.prod.yml build --no-cache</span>
 <span class="command">sudo docker compose -f docker-compose.prod.yml up -d</span> --force-recreate</pre>
 
+                <div class="info-box warning">
+                    <div class="icon-box">⚠️</div>
+                    <p><strong>Setelah update:</strong> Jika ada perubahan model database (kolom baru), jalankan migrasi
+                        manual. Lihat <strong>Step 9.4</strong> untuk panduan migrasi database.</p>
+                </div>
+
                 <h3>🗑️ Reset total (hapus semua data)</h3>
                 <pre><span class="comment"># HATI-HATI: Ini menghapus semua data termasuk database!</span>
 <span class="command">sudo docker compose -f docker-compose.prod.yml down -v</span>
@@ -1826,6 +1908,15 @@ ENDCONF</pre>
                         <tr>
                             <td><strong>Website URL</strong></td>
                             <td><code>http://notes.yuwan.my.id</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Super Admin</strong></td>
+                            <td>Login dengan <code>SUPER_ADMIN_EMAIL</code> → dashboard di <code>/admin</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Migrasi DB</strong></td>
+                            <td><code>docker exec -i cuynotes_db mysql -u notes_user -p... -e "ALTER TABLE..."</code>
+                                (lihat Step 9.4)</td>
                         </tr>
                     </tbody>
                 </table>
