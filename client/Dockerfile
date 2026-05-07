@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
 
@@ -7,8 +7,8 @@ RUN npm install
 
 COPY . .
 
-RUN chmod -R +x node_modules/.bin/ 2>/dev/null || true
+RUN npm run build
 
 EXPOSE 3000
 
-CMD ["node", "node_modules/next/dist/bin/next", "dev", "-H", "0.0.0.0"]
+CMD ["node", "node_modules/next/dist/bin/next", "start", "-H", "0.0.0.0"]
