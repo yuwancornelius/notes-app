@@ -1292,7 +1292,14 @@
                     <div class="icon-box">🚨</div>
                     <p><strong>Ganti <code>GANTI_DENGAN_DOMAIN_ATAU_IP</code></strong> dengan domain/subdomain atau IP
                         kamu.<br>
-                        Contoh: <code>cuynotes.yuwancornelius.com</code> atau <code>43.218.242.155</code></p>
+                        Contoh: <code>notes.yuwan.my.id</code> atau <code>43.218.242.155</code></p>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="icon-box">💡</div>
+                    <p><strong>Admin Panel:</strong> Route <code>/admin</code> (Super Admin dashboard) sudah otomatis
+                        ter-handle oleh <code>location /</code> yang proxy ke Next.js. Tidak perlu tambahan config
+                        Nginx untuk admin panel.</p>
                 </div>
 
                 <ol class="step-list" style="counter-reset: steps 3;">
@@ -1367,6 +1374,10 @@ NEXT_PUBLIC_API_URL: http://<span class="highlight">43.218.242.155</span>/api</p
                         <tr>
                             <td><code>http://cuynotes.domainmu.com/api/health</code></td>
                             <td>🔌 Response JSON dari backend API</td>
+                        </tr>
+                        <tr>
+                            <td><code>http://cuynotes.domainmu.com/admin</code></td>
+                            <td>🛡️ Admin Dashboard (login dengan Super Admin credentials)</td>
                         </tr>
                         <tr>
                             <td><code>http://43.218.242.155</code></td>
@@ -1513,7 +1524,8 @@ ENDCONF</pre>
                     <p><strong>Hasil akhir:</strong><br>
                         ✅ <code>http://notes.yuwan.my.id</code> → otomatis redirect ke HTTPS<br>
                         ✅ <code>https://notes.yuwan.my.id</code> → gembok hijau, aman!<br>
-                        ✅ <code>https://notes.yuwan.my.id/api/health</code> → Backend API via HTTPS</p>
+                        ✅ <code>https://notes.yuwan.my.id/api/health</code> → Backend API via HTTPS<br>
+                        ✅ <code>https://notes.yuwan.my.id/admin</code> → Super Admin Dashboard via HTTPS</p>
                 </div>
             </div>
         </section>
