@@ -37,11 +37,13 @@ def create_app():
     from app.routes.notes import notes_bp
     from app.routes.favorites import favorites_bp
     from app.routes.contributors import contributors_bp
+    from app.routes.admin import admin_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(notes_bp, url_prefix='/api/notes')
     app.register_blueprint(favorites_bp, url_prefix='/api/favorites')
     app.register_blueprint(contributors_bp, url_prefix='/api/notes')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
     # Create tables
     with app.app_context():

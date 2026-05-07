@@ -18,8 +18,12 @@ export default function LoginPage() {
         setLoading(true);
         setError('');
         try {
-            await login(email, password);
-            router.push('/');
+            const data = await login(email, password);
+            if (data.user?.role === 'superadmin') {
+                router.push('/admin');
+            } else {
+                router.push('/');
+            }
         } catch (err) {
             setError(err.message);
         }

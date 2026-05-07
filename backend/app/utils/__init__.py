@@ -5,9 +5,10 @@ from functools import wraps
 from flask import request, jsonify
 
 
-def generate_token(user_id):
+def generate_token(user_id, role='user'):
     payload = {
         'user_id': user_id,
+        'role': role,
         'exp': datetime.utcnow() + timedelta(days=7),
         'iat': datetime.utcnow()
     }
@@ -56,6 +57,35 @@ def optional_token(f):
                 current_user_id = payload['user_id']
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
                 pass
+
+        return f(current_user_id, *args, **kwargs)
+
+    return decorated
+
+
+def superadmin_required(f):
+    """Decorator that requires super admin role from JWT token."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization')
+
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 401
+
+        try:
+            payload = jwt.decode(token, os.getenv('JWT_SECRET_KEY', 'jwt-secret'), algorithms=['HS256'])
+            role = payload.get('role', 'user')
+            if role != 'superadmin':
+                return jsonify({'error': 'Super Admin access required'}), 403
+            current_user_id = payload['user_id']
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Invalid token'}), 401
 
         return f(current_user_id, *args, **kwargs)
 

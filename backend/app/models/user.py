@@ -11,6 +11,8 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     avatar = db.Column(db.String(255), default=None)
+    role = db.Column(db.String(20), nullable=False, default='user')  # user, admin
+    is_banned = db.Column(db.Boolean, nullable=False, default=False)
     security_question = db.Column(db.String(255), nullable=True)
     security_answer_hash = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -49,6 +51,8 @@ class User(db.Model):
             'username': self.username,
             'email': self.email,
             'avatar': self.avatar,
+            'role': self.role,
+            'is_banned': self.is_banned,
             'security_question': self.security_question,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

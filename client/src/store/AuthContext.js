@@ -13,6 +13,8 @@ export function AuthProvider({ children }) {
         checkAuth();
     }, []);
 
+    const isSuperAdmin = user?.role === 'superadmin';
+
     async function checkAuth() {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -58,7 +60,7 @@ export function AuthProvider({ children }) {
     }
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser, isSuperAdmin }}>
             {children}
         </AuthContext.Provider>
     );

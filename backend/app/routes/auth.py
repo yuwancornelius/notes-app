@@ -51,6 +51,11 @@ def register():
     if len(security_answer) < 2:
         return jsonify({'error': 'Security answer must be at least 2 characters'}), 400
 
+    # Prevent registration with super admin email
+    sa_email = os.getenv('SUPER_ADMIN_EMAIL', '').strip().lower()
+    if email.lower() == sa_email:
+        return jsonify({'error': 'Email already exists'}), 409
+
     if User.query.filter_by(username=username).first():
         return jsonify({'error': 'Username already exists'}), 409
 
@@ -86,12 +91,39 @@ def login():
     if not email or not password:
         return jsonify({'error': 'Email and password are required'}), 400
 
+    # Check if this is a super admin login
+    sa_email = os.getenv('SUPER_ADMIN_EMAIL', '').strip()
+    sa_password = os.getenv('SUPER_ADMIN_PASSWORD', '').strip()
+
+    if sa_email and sa_password and email.lower() == sa_email.lower() and password == sa_password:
+        # Super admin login — use a special user_id (0)
+        token = generate_token(0, role='superadmin')
+        return jsonify({
+            'message': 'Login successful',
+            'token': token,
+            'user': {
+                'id': 0,
+                'username': 'Super Admin',
+                'email': sa_email,
+                'avatar': None,
+                'role': 'superadmin',
+                'is_banned': False,
+                'security_question': None,
+                'created_at': None,
+            }
+        }), 200
+
+    # Regular user login
     user = User.query.filter_by(email=email).first()
 
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid email or password'}), 401
 
-    token = generate_token(user.id)
+    # Check if user is banned
+    if user.is_banned:
+        return jsonify({'error': 'Akun Anda telah diblokir. Hubungi administrator.'}), 403
+
+    token = generate_token(user.id, role=user.role)
 
     return jsonify({
         'message': 'Login successful',
@@ -199,6 +231,31 @@ def reset_password():
 @auth_bp.route('/me', methods=['GET'])
 @token_required
 def get_profile(current_user_id):
+    # Super admin check (user_id = 0)
+    if current_user_id == 0:
+        token = None
+        auth_header = request.headers.get('Authorization')
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+        try:
+            payload = jwt.decode(token, os.getenv('JWT_SECRET_KEY', 'jwt-secret'), algorithms=['HS256'])
+            if payload.get('role') == 'superadmin':
+                sa_email = os.getenv('SUPER_ADMIN_EMAIL', '')
+                return jsonify({
+                    'user': {
+                        'id': 0,
+                        'username': 'Super Admin',
+                        'email': sa_email,
+                        'avatar': None,
+                        'role': 'superadmin',
+                        'is_banned': False,
+                        'security_question': None,
+                        'created_at': None,
+                    }
+                }), 200
+        except Exception:
+            pass
+
     user = User.query.get(current_user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404

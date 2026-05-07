@@ -161,6 +161,63 @@ class ApiService {
     async toggleFavorite(noteId) {
         return this.request(`/favorites/${noteId}`, { method: 'POST' });
     }
+
+    // ==================== ADMIN ====================
+
+    // Admin - Stats
+    async getAdminStats() {
+        return this.request('/admin/stats');
+    }
+
+    // Admin - Users
+    async getAdminUsers(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.request(`/admin/users?${query}`);
+    }
+
+    async getAdminUser(id) {
+        return this.request(`/admin/users/${id}`);
+    }
+
+    async updateAdminUser(id, data) {
+        return this.request(`/admin/users/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteAdminUser(id) {
+        return this.request(`/admin/users/${id}`, { method: 'DELETE' });
+    }
+
+    async banUser(id) {
+        return this.request(`/admin/users/${id}/ban`, { method: 'POST' });
+    }
+
+    async unbanUser(id) {
+        return this.request(`/admin/users/${id}/unban`, { method: 'POST' });
+    }
+
+    // Admin - Notes
+    async getAdminNotes(params = {}) {
+        const query = new URLSearchParams(params).toString();
+        return this.request(`/admin/notes?${query}`);
+    }
+
+    async getAdminNote(id) {
+        return this.request(`/admin/notes/${id}`);
+    }
+
+    async updateAdminNote(id, data) {
+        return this.request(`/admin/notes/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deleteAdminNote(id) {
+        return this.request(`/admin/notes/${id}`, { method: 'DELETE' });
+    }
 }
 
 const api = new ApiService();

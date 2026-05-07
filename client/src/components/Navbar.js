@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Navbar({ onSearch }) {
-    const { user, logout } = useAuth();
+    const { user, logout, isSuperAdmin } = useAuth();
     const router = useRouter();
     const [showDropdown, setShowDropdown] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -66,11 +66,24 @@ export default function Navbar({ onSearch }) {
                         onClick={() => setShowDropdown(!showDropdown)}
                         className="flex items-center gap-2 hover:opacity-80 transition"
                     >
-                        <span className="text-sm text-gray-600">Halo, <strong>{user.username}</strong></span>
-                        <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-                            <svg className="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z" />
-                            </svg>
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-sm text-gray-600">Halo, <strong>{user.username}</strong></span>
+                            {isSuperAdmin && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">
+                                    ADMIN
+                                </span>
+                            )}
+                        </div>
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden ${isSuperAdmin ? 'bg-gradient-to-br from-red-500 to-orange-500' : 'bg-gray-300'}`}>
+                            {isSuperAdmin ? (
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z" />
+                                </svg>
+                            )}
                         </div>
                         <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -79,6 +92,12 @@ export default function Navbar({ onSearch }) {
 
                     {showDropdown && (
                         <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 z-50">
+                            {isSuperAdmin && (
+                                <button onClick={() => { router.push('/admin'); setShowDropdown(false); }} className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                    Admin Panel
+                                </button>
+                            )}
                             <button onClick={() => { router.push('/profile'); setShowDropdown(false); }} className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                                 Profile
